@@ -1,41 +1,40 @@
-// src/components/TranscriberCard.tsx
 import type { ReactNode } from "react";
 
-type TranscriberCardProps = {
-  icon: ReactNode;
-  buttonColor: string;
-  borderColor: string;
+type Props = {
+  theme: {
+    icon: ReactNode;
+    color: string;
+    iconSize?: number;
+  };
   description: ReactNode;
   input?: ReactNode;
-  roundedTopRight?: boolean;
   showButton?: boolean;
+  roundedTopRight?: boolean;
 };
 
 export default function TranscriberCard({
-  icon,
-  buttonColor,
-  borderColor,
+  theme,
   description,
   input,
-  roundedTopRight = true,
   showButton = true,
-}: TranscriberCardProps) {
+  roundedTopRight = true,
+}: Props) {
   const baseRadius = "rounded-[25px]";
   const customRadius = roundedTopRight ? "" : "rounded-tr-none";
 
   return (
     <div
       className={`relative w-3xl h-[429px] bg-white flex flex-col items-center justify-center gap-6 border-2 ${baseRadius} ${customRadius}`}
-      style={{ borderColor }}
+      style={{ borderColor: theme.color }}
     >
       {input}
 
       {showButton && (
         <button
           className="w-16 h-16 rounded-full text-white flex items-center justify-center cursor-pointer"
-          style={{ backgroundColor: buttonColor }}
+          style={{ backgroundColor: theme.color }}
         >
-          {icon}
+          {theme.icon}
         </button>
       )}
 

@@ -1,7 +1,6 @@
-// src/components/TabButton.tsx
 import type { ReactNode } from "react";
 
-type TabButtonProps = {
+type Props = {
   active: boolean;
   onClick: () => void;
   icon: ReactNode;
@@ -15,7 +14,7 @@ export default function TabButton({
   icon,
   label,
   activeColor,
-}: TabButtonProps) {
+}: Props) {
   return (
     <button
       onClick={onClick}
