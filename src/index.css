@@ -1,0 +1,10 @@
+@import "tailwindcss";
+
+/* @import url('https://cdn.fontcdn.ir/Font/Persian/IranYekan/IranYekan.css'); */
+
+@font-face {
+  font-family: 'Yekan';
+  src: url('./assets/fonts/yekan.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
