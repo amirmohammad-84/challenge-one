@@ -30,7 +30,7 @@ function Sidebar() {
       </div>
       <Link
         to="/"
-        className={`absolute top-56 left-1/2 transform -translate-x-1/2 w-36 h-12 flex items-center justify-center rounded-xl px-4 cursor-pointer transition-opacity ${
+        className={`absolute top-72 left-1/2 transform -translate-x-1/2 w-36 h-12 flex items-center justify-center rounded-xl px-4 cursor-pointer transition-opacity ${
           activeTab === 'voice' ? 'bg-[#02816E] text-white' : 'bg-transparent text-black'
         }`}
       >
@@ -39,7 +39,7 @@ function Sidebar() {
       </Link>
       <Link
         to="/archive"
-        className={`absolute top-80 left-1/2 transform -translate-x-1/2 w-36 h-12 flex items-center justify-center rounded-xl px-4 cursor-pointer transition-opacity ${
+        className={`absolute top-96 left-1/2 transform -translate-x-1/2 w-36 h-12 flex items-center justify-center rounded-xl px-4 cursor-pointer transition-opacity ${
           activeTab === 'archive' ? 'bg-[#02816E] text-white' : 'bg-transparent text-black'
         }`}
       >
@@ -55,7 +55,7 @@ function Header() {
   const greenColor = '#00BA9F';
 
   return (
-    <div className="absolute left-11">
+    <div className="absolute left-11 top-10">
       <div
         className={`w-[121px] bg-white rounded-[20px] flex flex-col items-center cursor-default transition-all duration-300 ease-in-out`}
         style={{

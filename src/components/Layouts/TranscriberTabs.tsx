@@ -1,88 +1,98 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useState, useMemo, useEffect } from "react"
 import {
   MicrophoneIcon,
   ArrowUpTrayIcon,
   LinkIcon,
-} from "@heroicons/react/24/solid";
+} from "@heroicons/react/24/solid"
+import { useSearchParams } from "react-router-dom"
 
-import TabButton from "../common/transcribe/TabButton";
-import TranscriberCard from "../common/transcribe/TranscriberCard";
-import { TranscriberInput } from "../common/transcribe/TranscriberInput";
-import type { TabConfig } from "../Types/transcriber";
-import Footer from "../common/Footer";
+import TabButton from "../common/transcribe/TabButton"
+import TranscriberCard from "../common/transcribe/TranscriberCard"
+import { TranscriberInput } from "../common/transcribe/TranscriberInput"
+import type { TabConfig } from "../Types/transcriber"
+import Footer from "../common/Footer"
+import TranscriptResult from "../common/transcribe/TranscriptResult/TranscriptResult"
 
-const tabs: TabConfig[] = [
-  {
-    id: "record",
-    label: "ضبط گفتار",
-    icon: <MicrophoneIcon className="w-5 h-5" />,
-    color: "#00BA9F",
-    iconSize: 32,
-    roundedTopRight: false,
-    description: (
-      <>
-        برای شروع به صحبت، دکمه را فشار دهید
-        <br />
-        متن پیاده شده آن، در اینجا ظاهر شود
-      </>
-    ),
-  },
-  {
-    id: "upload",
-    label: "بارگذاری فایل",
-    icon: <ArrowUpTrayIcon className="w-5 h-5" />,
-    color: "#118AD3",
-    iconSize: 32,
-    description: (
-      <>
-        برای بارگذاری فایل گفتاری (صوتی/تصویری)، دکمه را فشار دهید
-        <br />
-        متن پیاده شده آن، در اینجا ظاهر می شود
-      </>
-    ),
-  },
-  {
-    id: "link",
-    label: "لینک",
-    icon: <LinkIcon className="w-5 h-5" />,
-    color: "#FF1654",
-    iconSize: 16,
-    showButton: false,
-    description: (
-      <>
-        نشانی اینترنتی فایل حاوی گفتار (صوتی/تصویری) را وارد
-        <br />
-        و دکمه را فشار دهید
-      </>
-    ),
-    input: <TranscriberInput color="#FF1654" />,
-  },
-];
+const rawText = `[با][---][---] [با] و[---][---] [با][---][---][---][---] کجایی تو [خوش] می دیدی من خسته شدم [ما را] [به] این [زودی] چه جوری شد [عشق شدی] به این است[---] [آخرش] سی با فکر [و] چقدر [نزار می خوام] که [چشم تو] [و با رفت][---][---][---][---][---][---][---][---] سخت [آرام] ولی ازت می خوام[---] بر نگردی هر کسی که به [تو] باشه[---] کاشکی تو منو [بردی] [که چشمک][---] با[---][---][---][---][---] [ابو][---] [با] و و و و و [او]`
 
 export default function TranscriberTabs() {
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
-  const initialTab = searchParams.get("tab");
-  const validTab = tabs.find((tab) => tab.id === initialTab)?.id || "record";
-
-  const [activeTab, setActiveTab] = useState<string>(validTab);
+  const [searchParams, setSearchParams] = useSearchParams()
+  const tabFromQuery = searchParams.get("tab") as "record" | "upload" | "link" | null
+  const [activeTab, setActiveTab] = useState<"record" | "upload" | "link">(tabFromQuery ?? "record")
+  const [submitted, setSubmitted] = useState(false)
+  const [audioUrl, setAudioUrl] = useState<string | null>(null)
 
   useEffect(() => {
-    if (validTab !== activeTab) {
-      setActiveTab(validTab);
+    if (tabFromQuery && tabFromQuery !== activeTab) {
+      setActiveTab(tabFromQuery)
+      setSubmitted(false)
+      setAudioUrl(null)
     }
-  }, [validTab]);
+  }, [tabFromQuery])
 
-  const handleTabClick = useCallback((tabId: string) => {
-    navigate(`/?tab=${tabId}`, { replace: true });
-    setActiveTab(tabId);
-  }, [navigate]);
+  const handleSend = (blobUrl?: string) => {
+    setAudioUrl(blobUrl || null)
+    setSubmitted(true)
+  }
 
-  const currentTab = useMemo(() => tabs.find((tab) => tab.id === activeTab)!, [activeTab]);
+  const handleTabClick = (tabId: "record" | "upload" | "link") => {
+    setActiveTab(tabId)
+    setSubmitted(false)
+    setAudioUrl(null)
+    setSearchParams({ tab: tabId })
+  }
+
+  const tabs: TabConfig[] = [
+    {
+      id: "record",
+      label: "ضبط گفتار",
+      icon: <MicrophoneIcon className="w-5 h-5" />,
+      color: "#00BA9F",
+      iconSize: 32,
+      roundedTopRight: false,
+      description: (
+        <>
+          برای شروع به صحبت، دکمه را فشار دهید
+          <br />
+          متن پیاده شده آن، در اینجا ظاهر شود
+        </>
+      ),
+    },
+    {
+      id: "upload",
+      label: "بارگذاری فایل",
+      icon: <ArrowUpTrayIcon className="w-5 h-5" />,
+      color: "#118AD3",
+      iconSize: 32,
+      description: (
+        <>
+          برای بارگذاری فایل گفتاری (صوتی/تصویری)، دکمه را فشار دهید
+          <br />
+          متن پیاده شده آن، در اینجا ظاهر می شود
+        </>
+      ),
+    },
+    {
+      id: "link",
+      label: "لینک",
+      icon: <LinkIcon className="w-5 h-5" />,
+      color: "#FF1654",
+      iconSize: 16,
+      showButton: false,
+      description: (
+        <>
+          نشانی اینترنتی فایل حاوی گفتار (صوتی/تصویری) را وارد
+          <br />
+          و دکمه را فشار دهید
+        </>
+      ),
+      input: (
+        <TranscriberInput color="#FF1654" onSubmit={() => handleSend()} />
+      ),
+    },
+  ]
+
+  const currentTab = useMemo(() => tabs.find((tab) => tab.id === activeTab)!, [activeTab])
 
   return (
     <div className="flex flex-col items-center">
@@ -92,7 +102,7 @@ export default function TranscriberTabs() {
             <TabButton
               key={tab.id}
               active={activeTab === tab.id}
-              onClick={() => handleTabClick(tab.id)}
+              onClick={() => handleTabClick(tab.id as "record" | "upload" | "link")}
               icon={tab.icon}
               label={tab.label}
               activeColor={tab.color}
@@ -101,17 +111,30 @@ export default function TranscriberTabs() {
         </div>
 
         <div className="w-full flex justify-center">
-          <TranscriberCard
-            theme={{
-              color: currentTab.color,
-              icon: currentTab.icon,
-              iconSize: currentTab.iconSize,
-            }}
-            description={currentTab.description}
-            input={currentTab.input}
-            roundedTopRight={currentTab.roundedTopRight}
-            showButton={currentTab.showButton}
-          />
+          {submitted ? (
+            <TranscriptResult
+              type="simple"
+              audioUrl={audioUrl ?? undefined}
+              text={rawText}
+              onReset={() => {
+                setSubmitted(false)
+                setAudioUrl(null)
+              } } tab={"record"}            />
+          ) : (
+            <TranscriberCard
+              theme={{
+                color: currentTab.color,
+                icon: currentTab.icon,
+                iconSize: currentTab.iconSize,
+              }}
+              description={currentTab.description}
+              input={currentTab.input}
+              roundedTopRight={currentTab.roundedTopRight}
+              showButton={currentTab.showButton}
+              onClearText={() => setSubmitted(false)}
+              onSend={(blobUrl) => handleSend(blobUrl)}
+            />
+          )}
         </div>
       </div>
 
@@ -121,5 +144,5 @@ export default function TranscriberTabs() {
         </div>
       </div>
     </div>
-  );
+  )
 }

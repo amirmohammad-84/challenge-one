@@ -1,8 +1,10 @@
-import { LinkIcon } from "@heroicons/react/24/outline";
-import micIcon from "../../../assets/mic2.svg";
-import cloudIcon from "../../../assets/cloud.svg";
-import ArchiveActions from "./ArchiveActions";
-import type { FileItem } from "../../Types/archive";
+import { useState, useRef, useEffect } from "react"
+import ArchiveExpandedRow from "./ArchiveExpandedRow"
+import { LinkIcon } from "@heroicons/react/24/outline"
+import micIcon from "../../../assets/mic2.svg"
+import cloudIcon from "../../../assets/cloud.svg"
+import ArchiveActions from "./ArchiveActions"
+import type { FileItem } from "../../Types/archive"
 
 const iconMap = {
   link: {
@@ -17,27 +19,81 @@ const iconMap = {
     icon: <img src={cloudIcon} alt="cloud" className="w-4 h-4" />,
     bg: "bg-[#118AD3]",
   },
-};
+}
+
+const iconToTabMap: Record<"link" | "mic" | "cloud", "link" | "upload" | "record"> = {
+  link: "link",
+  mic: "record",
+  cloud: "upload",
+}
 
 export default function ArchiveTableRow({ file }: { file: FileItem }) {
-  const icon = iconMap[file.icon];
+  const icon = iconMap[file.icon]
+  const tab = iconToTabMap[file.icon]
+  const [expanded, setExpanded] = useState(false)
+  const contentRef = useRef<HTMLDivElement>(null)
+  const [height, setHeight] = useState(0)
+
+  useEffect(() => {
+    if (expanded && contentRef.current) {
+      setHeight(contentRef.current.scrollHeight)
+    } else {
+      setHeight(0)
+    }
+  }, [expanded])
 
   return (
-    <tr className="hover:shadow-[1px_2px_5px_0px_rgba(0,0,0,0.05)] transition h-12 rounded-[10px] cursor-pointer bg-white">
-      <td className="w-1/2 px-3 text-sm text-gray-700 text-center">
-        <div className="flex items-center gap-2.5 max-w-md mr-5 truncate">
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center ${icon.bg}`}>
-            {icon.icon}
+    <tr>
+      <td colSpan={5} className="p-0">
+        <div
+          onClick={() => setExpanded(!expanded)}
+          className={`cursor-pointer bg-white rounded-[10px] transition-shadow duration-300 ${
+            expanded ? "shadow-[1px_2px_5px_rgba(0,0,0,0.05)] border" : ""
+          }`}
+          style={{
+            borderColor: expanded
+              ? {
+                  record: "#00BA9F",
+                  upload: "#118AD3",
+                  link: "#FF1654",
+                }[tab]
+              : "transparent",
+            borderWidth: expanded ? 1 : 0,
+            borderStyle: "solid",
+          }}
+        >
+          <div className="flex items-center px-3 h-12 select-none">
+            <div
+              className={`w-8 h-8 rounded-full flex items-center justify-center ${icon.bg} flex-shrink-0`}
+            >
+              {icon.icon}
+            </div>
+            <span className="truncate flex-1 mx-4 text-gray-700 text-sm">
+              {file.name}
+            </span>
+            <div className="w-[12.5%] text-center text-sm text-gray-600">{file.date}</div>
+            <div className="w-[12.5%] text-center text-sm text-gray-600">.{file.type}</div>
+            <div className="w-[12.5%] text-center text-sm text-gray-600">{file.duration}</div>
+            <div className="w-[12.5%] pr-1 flex justify-center">
+              <ArchiveActions size={file.size} />
+            </div>
           </div>
-          <span className="truncate flex items-center">{file.name}</span>
+          <div
+            ref={contentRef}
+            className="overflow-hidden transition-[height] duration-300 px-4 pb-4"
+            style={{ height }}
+            onClick={e => e.stopPropagation()}
+          >
+            {expanded && (
+              <ArchiveExpandedRow
+                tab={tab}
+                text="عشق! آره، این کلمه‌اش بود. خوبی تو، آرزو که دیگه‌م رو... [ادامه متن ترنسکرایب]"
+                audioUrl="/audios/sample.mp3"
+              />
+            )}
+          </div>
         </div>
       </td>
-      <td className="w-[12.5%] text-sm text-gray-600 text-center">{file.date}</td>
-      <td className="w-[12.5%] text-sm text-gray-600 text-center">.{file.type}</td>
-      <td className="w-[12.5%] text-sm text-gray-600 text-center">{file.duration}</td>
-      <td className="w-[12.5%] pr-1">
-        <ArchiveActions size={file.size} />
-      </td>
     </tr>
-  );
+  )
 }
