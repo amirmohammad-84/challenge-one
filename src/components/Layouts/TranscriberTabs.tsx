@@ -35,6 +35,7 @@ export default function TranscriberTabs() {
       setSubmitted(false)
       setAudioUrl(null)
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tabFromQuery])
 
   // تابع مدیریت ارسال (صوت یا لینک)
@@ -103,6 +104,7 @@ export default function TranscriberTabs() {
   ]
 
   // تب فعلی
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const currentTab = useMemo(() => tabs.find((tab) => tab.id === activeTab)!, [activeTab])
 
   return (
