@@ -18,10 +18,17 @@ const rawText = `[با][---][---] [با] و[---][---] [با][---][---][---][---]
 export default function TranscriberTabs() {
   const [searchParams, setSearchParams] = useSearchParams()
   const tabFromQuery = searchParams.get("tab") as "record" | "upload" | "link" | null
+
+  // وضعیت تب فعال
   const [activeTab, setActiveTab] = useState<"record" | "upload" | "link">(tabFromQuery ?? "record")
+
+  // آیا کاربر روی ارسال کلیک کرده؟
   const [submitted, setSubmitted] = useState(false)
+
+  // آدرس URL صوت ضبط شده یا آپلود شده
   const [audioUrl, setAudioUrl] = useState<string | null>(null)
 
+  // هر بار که query param تغییر می‌کند، تب را آپدیت و حالت ارسال را ریست کن
   useEffect(() => {
     if (tabFromQuery && tabFromQuery !== activeTab) {
       setActiveTab(tabFromQuery)
@@ -30,11 +37,13 @@ export default function TranscriberTabs() {
     }
   }, [tabFromQuery])
 
+  // تابع مدیریت ارسال (صوت یا لینک)
   const handleSend = (blobUrl?: string) => {
     setAudioUrl(blobUrl || null)
     setSubmitted(true)
   }
 
+  // کلیک روی تب (record, upload, link)
   const handleTabClick = (tabId: "record" | "upload" | "link") => {
     setActiveTab(tabId)
     setSubmitted(false)
@@ -42,6 +51,7 @@ export default function TranscriberTabs() {
     setSearchParams({ tab: tabId })
   }
 
+  // تنظیمات تب‌ها
   const tabs: TabConfig[] = [
     {
       id: "record",
@@ -92,6 +102,7 @@ export default function TranscriberTabs() {
     },
   ]
 
+  // تب فعلی
   const currentTab = useMemo(() => tabs.find((tab) => tab.id === activeTab)!, [activeTab])
 
   return (
@@ -119,7 +130,9 @@ export default function TranscriberTabs() {
               onReset={() => {
                 setSubmitted(false)
                 setAudioUrl(null)
-              } } tab={"record"}            />
+              }}
+              tab={activeTab}
+            />
           ) : (
             <TranscriberCard
               theme={{

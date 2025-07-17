@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import {
   PauseIcon,
   StopIcon,
@@ -39,36 +39,40 @@ export default function TranscriberCard({
 
   useEffect(() => {
     return () => {
-      if (stream.current) {
-        stream.current.getTracks().forEach((track) => track.stop());
-      }
+      stream.current?.getTracks().forEach((track) => track.stop());
       if (audioUrl) URL.revokeObjectURL(audioUrl);
     };
   }, [audioUrl]);
 
-  const startRecording = async () => {
+  const startRecording = useCallback(async () => {
     if (mode !== "initial") return;
-    if (onClearText) onClearText();
+    onClearText?.();
     try {
-      stream.current = await navigator.mediaDevices.getUserMedia({ audio: true });
-      mediaRecorder.current = new MediaRecorder(stream.current);
+      const newStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(newStream);
+      stream.current = newStream;
+      mediaRecorder.current = recorder;
       chunks.current = [];
-      mediaRecorder.current.ondataavailable = (e) => {
+
+      recorder.ondataavailable = (e) => {
         if (e.data.size > 0) chunks.current.push(e.data);
       };
-      mediaRecorder.current.onstop = () => {
+      recorder.onstop = () => {
         const blob = new Blob(chunks.current, { type: "audio/webm" });
         const url = URL.createObjectURL(blob);
         setAudioUrl(url);
         setMode("stopped");
-        stream.current?.getTracks().forEach((track) => track.stop());
+        newStream.getTracks().forEach((track) => track.stop());
       };
-      mediaRecorder.current.start();
-      setMode("recording");
-    } catch { /* empty */ }
-  };
 
-  const pauseResumeRecording = () => {
+      recorder.start();
+      setMode("recording");
+    } catch {
+      // fail silently
+    }
+  }, [mode, onClearText]);
+
+  const pauseResumeRecording = useCallback(() => {
     if (!mediaRecorder.current) return;
     if (mode === "recording") {
       mediaRecorder.current.pause();
@@ -77,20 +81,21 @@ export default function TranscriberCard({
       mediaRecorder.current.resume();
       setMode("recording");
     }
-  };
+  }, [mode]);
 
-  const stopRecording = () => {
-    if (!mediaRecorder.current) return;
-    if (mode === "recording" || mode === "paused") {
+  const stopRecording = useCallback(() => {
+    if ((mode === "recording" || mode === "paused") && mediaRecorder.current) {
       mediaRecorder.current.stop();
     }
-  };
+  }, [mode]);
 
-  const reset = () => {
-    if (audioUrl) URL.revokeObjectURL(audioUrl);
+  const reset = useCallback(() => {
+    if (audioUrl) {
+      URL.revokeObjectURL(audioUrl);
+    }
     setAudioUrl(null);
     setMode("initial");
-  };
+  }, [audioUrl]);
 
   return (
     <div
@@ -177,7 +182,7 @@ export default function TranscriberCard({
               aria-label="ارسال"
               type="button"
             >
-              <PaperAirplaneIcon className="w-6 h-6 text-white rotate-0" />
+              <PaperAirplaneIcon className="w-6 h-6 text-white" />
             </button>
           </div>
         </div>

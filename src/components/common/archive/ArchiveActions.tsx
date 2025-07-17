@@ -2,9 +2,21 @@ import wordIcon from "../../../assets/word.svg";
 import copyIcon from "../../../assets/copy.svg";
 import trashIcon from "../../../assets/trash.svg";
 import downloadIcon from "../../../assets/download.svg";
+import type { FC } from "react";
 
-export default function ArchiveActions({ size }: { size: string }) {
-  const actions = [
+type Props = {
+  size: string;
+};
+
+type Action = {
+  icon: string;
+  alt: string;
+  bg: string;
+  tooltip?: string;
+};
+
+const ArchiveActions: FC<Props> = ({ size }) => {
+  const actions: Action[] = [
     {
       icon: downloadIcon,
       alt: "download",
@@ -30,9 +42,9 @@ export default function ArchiveActions({ size }: { size: string }) {
 
   return (
     <div className="flex items-center gap-1">
-      {actions.map(({ icon, alt, bg, tooltip }, idx) => (
+      {actions.map(({ icon, alt, bg, tooltip }) => (
         <div
-          key={idx}
+          key={alt}
           title={tooltip}
           className={`w-6 h-6 flex items-center justify-center rounded-full cursor-pointer group ${bg}`}
         >
@@ -41,11 +53,12 @@ export default function ArchiveActions({ size }: { size: string }) {
             alt={alt}
             width={16}
             height={16}
-            className="text-gray-400 group-hover:text-white transition duration-200"
-            style={{ filter: "none" }}
+            className="group-hover:text-white transition duration-200"
           />
         </div>
       ))}
     </div>
   );
-}
+};
+
+export default ArchiveActions;

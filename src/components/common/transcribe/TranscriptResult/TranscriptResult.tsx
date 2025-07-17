@@ -1,9 +1,8 @@
-import { useState, useRef } from "react"
+import { useState, useRef, useCallback, memo } from "react"
 import SimpleTranscript from "./SimpleTranscript"
 import TimelineTranscript from "./TimelineTranscript"
 import AudioPlayer from "./AudioPlayer"
-import { ArrowPathIcon } from "@heroicons/react/24/outline"
-import { Bars3Icon, ClockIcon } from "@heroicons/react/24/outline"
+import { ArrowPathIcon, Bars3Icon, ClockIcon } from "@heroicons/react/24/outline"
 
 type Props = {
   type: "simple" | "timeline"
@@ -14,7 +13,7 @@ type Props = {
   onChangeType?: (type: "simple" | "timeline") => void
 }
 
-function Tooltip({ children, text }: { children: React.ReactNode; text: string }) {
+const Tooltip = memo(({ children, text }: { children: React.ReactNode; text: string }) => {
   const [visible, setVisible] = useState(false)
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 
@@ -31,48 +30,33 @@ function Tooltip({ children, text }: { children: React.ReactNode; text: string }
     <div className="relative inline-block" onMouseEnter={show} onMouseLeave={hide}>
       {children}
       {visible && (
-        <div
-          className="absolute z-50 bottom-full mb-2 px-2 py-1 rounded bg-black text-white text-xs whitespace-nowrap select-none pointer-events-none"
-          style={{ left: "50%", transform: "translateX(-50%)", userSelect: "none" }}
-        >
+        <div className="absolute z-50 bottom-full mb-2 px-2 py-1 rounded bg-black text-white text-xs whitespace-nowrap pointer-events-none left-1/2 -translate-x-1/2 select-none">
           {text}
-          <div
-            style={{
-              position: "absolute",
-              top: "100%",
-              left: "50%",
-              marginLeft: -5,
-              width: 0,
-              height: 0,
-              borderLeft: "5px solid transparent",
-              borderRight: "5px solid transparent",
-              borderTop: "5px solid rgba(0, 0, 0, 0.5)",
-            }}
-          />
+          <div className="absolute top-full left-1/2 -ml-[5px] w-0 h-0 border-x-[5px] border-x-transparent border-t-[5px] border-t-[rgba(0,0,0,0.5)]" />
         </div>
       )}
     </div>
   )
-}
+})
 
 export default function TranscriptResult({ type, tab, audioUrl, text, onReset, onChangeType }: Props) {
   const [copied, setCopied] = useState(false)
 
-  const copyToClipboard = () => {
+  const copyToClipboard = useCallback(() => {
     navigator.clipboard.writeText(text)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
-  }
+  }, [text])
 
-  const downloadText = () => {
+  const downloadText = useCallback(() => {
     const blob = new Blob([text], { type: "text/plain;charset=utf-8" })
-    const url = window.URL.createObjectURL(blob)
+    const url = URL.createObjectURL(blob)
     const a = document.createElement("a")
     a.href = url
     a.download = "transcript.txt"
     a.click()
-    window.URL.revokeObjectURL(url)
-  }
+    URL.revokeObjectURL(url)
+  }, [text])
 
   const borderColor = {
     record: "#00BA9F",
@@ -82,16 +66,15 @@ export default function TranscriptResult({ type, tab, audioUrl, text, onReset, o
 
   return (
     <div
-      className="w-full max-w-3xl bg-white p-4 flex flex-col justify-between"
+      className="w-full max-w-3xl bg-white p-4 flex flex-col justify-between rounded-[16px]"
       style={{
         height: 429,
         minHeight: 429,
         border: `1px solid ${borderColor}`,
-        borderRadius: "16px",
-        borderTopRightRadius: tab === "record" ? 0 : "16px",
+        borderTopRightRadius: tab === "record" ? 0 : 16,
       }}
     >
-      <div className="flex justify-between items-center px-2 pb-5" style={{ borderBottom: "0.25px solid rgba(0, 0, 0, 0.5)" }}>
+      <div className="flex justify-between items-center px-2 pb-5 border-b border-black/50">
         <div className="flex items-center gap-6 relative">
           {(["simple", "timeline"] as const).map((t) => {
             const active = type === t
@@ -114,16 +97,12 @@ export default function TranscriptResult({ type, tab, audioUrl, text, onReset, o
                     متن زمان‌بندی شده
                   </>
                 )}
-                {active && (
-                  <span
-                    className="absolute bottom-0 left-0 right-0"
-                    style={{ height: "1px", backgroundColor: "rgba(0,0,0,1)" }}
-                  />
-                )}
+                {active && <span className="absolute bottom-0 left-0 right-0 h-[1px] bg-black" />}
               </button>
             )
           })}
         </div>
+
         <div className="flex items-center gap-4">
           <Tooltip text={copied ? "کپی شد!" : "کپی"}>
             <button
@@ -147,13 +126,10 @@ export default function TranscriptResult({ type, tab, audioUrl, text, onReset, o
           </Tooltip>
           <button
             onClick={onReset}
-            className="flex items-center gap-2 text-white px-3 py-1"
+            className="flex items-center gap-2 text-white px-3 py-1 border rounded-full"
             style={{
               backgroundColor: "rgba(17, 138, 211, 1)",
               borderColor: "rgba(17, 138, 211, 1)",
-              borderRadius: "20px",
-              borderWidth: 1,
-              borderStyle: "solid",
             }}
             type="button"
           >
@@ -165,13 +141,8 @@ export default function TranscriptResult({ type, tab, audioUrl, text, onReset, o
 
       <div className="flex flex-col justify-between flex-grow">
         <div className="px-2 overflow-y-auto pt-4" style={{ maxHeight: 429 - 80 - 52 }}>
-          {type === "simple" ? (
-            <SimpleTranscript text={text} />
-          ) : (
-            <TimelineTranscript text={text} />
-          )}
+          {type === "simple" ? <SimpleTranscript text={text} /> : <TimelineTranscript text={text} />}
         </div>
-
         {audioUrl && (
           <div className="mt-2">
             <AudioPlayer url={audioUrl} />

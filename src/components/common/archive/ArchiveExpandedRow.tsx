@@ -1,8 +1,8 @@
+import { useState } from "react"
 import SimpleTranscript from "../transcribe/TranscriptResult/SimpleTranscript"
 import TimelineTranscript from "../transcribe/TranscriptResult/TimelineTranscript"
 import AudioPlayer from "../transcribe/TranscriptResult/AudioPlayer"
 import { Bars3Icon, ClockIcon } from "@heroicons/react/24/outline"
-import { useState } from "react"
 
 type Props = {
   tab: "record" | "upload" | "link"
@@ -10,39 +10,36 @@ type Props = {
   audioUrl?: string
 }
 
+const transcriptTypes = [
+  { type: "simple", label: "متن ساده", Icon: Bars3Icon },
+  { type: "timeline", label: "متن زمان‌بندی شده", Icon: ClockIcon },
+] as const
+
 export default function ArchiveExpandedRow({ text, audioUrl }: Props) {
   const [type, setType] = useState<"simple" | "timeline">("simple")
 
   return (
     <div
       className="w-full bg-white px-4 py-4 mt-2 rounded-[10px]"
-      style={{
-        height: 371,
-      }}
+      style={{ height: 371 }}
     >
-      <div className="flex justify-between items-center px-2 pb-3" style={{ borderBottom: "0.25px solid rgba(0,0,0,0.5)" }}>
+      <div
+        className="flex justify-between items-center px-2 pb-3"
+        style={{ borderBottom: "0.25px solid rgba(0,0,0,0.5)" }}
+      >
         <div className="flex items-center gap-6 relative">
-          {(["simple", "timeline"] as const).map((t) => {
+          {transcriptTypes.map(({ type: t, label, Icon }) => {
             const active = type === t
             return (
               <button
                 key={t}
-                className="text-sm font-semibold text-gray-700 flex items-center gap-1 relative pb-1"
                 type="button"
                 aria-pressed={active}
                 onClick={() => setType(t)}
+                className="text-sm font-semibold text-gray-700 flex items-center gap-1 relative pb-1"
               >
-                {t === "simple" ? (
-                  <>
-                    <Bars3Icon className="w-5 h-5" />
-                    متن ساده
-                  </>
-                ) : (
-                  <>
-                    <ClockIcon className="w-5 h-5" />
-                    متن زمان‌بندی شده
-                  </>
-                )}
+                <Icon className="w-5 h-5" />
+                {label}
                 {active && (
                   <span className="absolute bottom-0 left-0 right-0 h-[1px] bg-black" />
                 )}
