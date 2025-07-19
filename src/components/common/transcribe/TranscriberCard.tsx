@@ -20,6 +20,7 @@ type Props = {
   roundedTopRight?: boolean;
   onClearText?: () => void;
   onSend?: (blobUrl?: string) => void;
+  onUploadClick?: () => void;
 };
 
 export default function TranscriberCard({
@@ -30,8 +31,11 @@ export default function TranscriberCard({
   roundedTopRight = true,
   onClearText,
   onSend,
+  onUploadClick,
 }: Props) {
-  const [mode, setMode] = useState<"initial" | "recording" | "paused" | "stopped">("initial");
+  const [mode, setMode] = useState<
+    "initial" | "recording" | "paused" | "stopped"
+  >("initial");
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const mediaRecorder = useRef<MediaRecorder | null>(null);
   const chunks = useRef<Blob[]>([]);
@@ -48,7 +52,9 @@ export default function TranscriberCard({
     if (mode !== "initial") return;
     onClearText?.();
     try {
-      const newStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const newStream = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+      });
       const recorder = new MediaRecorder(newStream);
       stream.current = newStream;
       mediaRecorder.current = recorder;
@@ -67,9 +73,7 @@ export default function TranscriberCard({
 
       recorder.start();
       setMode("recording");
-    } catch {
-      // fail silently
-    }
+    } catch { /* empty */ }
   }, [mode, onClearText]);
 
   const pauseResumeRecording = useCallback(() => {
@@ -106,12 +110,24 @@ export default function TranscriberCard({
     >
       {input}
 
-      {mode === "initial" && showButton && (
+      {mode === "initial" && showButton && !onUploadClick && (
         <button
           onClick={startRecording}
           className="w-16 h-16 rounded-full text-white flex items-center justify-center cursor-pointer"
           style={{ backgroundColor: theme.color }}
           aria-label="شروع ضبط"
+          type="button"
+        >
+          {theme.icon}
+        </button>
+      )}
+
+      {mode === "initial" && showButton && onUploadClick && (
+        <button
+          onClick={onUploadClick}
+          className="w-16 h-16 rounded-full text-white flex items-center justify-center cursor-pointer"
+          style={{ backgroundColor: theme.color }}
+          aria-label="بارگذاری فایل"
           type="button"
         >
           {theme.icon}
@@ -188,7 +204,9 @@ export default function TranscriberCard({
         </div>
       )}
 
-      <p className="text-base font-light text-center leading-6 text-[#000] px-8">{description}</p>
+      <p className="text-base font-light text-center leading-6 text-[#000] px-8">
+        {description}
+      </p>
     </div>
   );
 }

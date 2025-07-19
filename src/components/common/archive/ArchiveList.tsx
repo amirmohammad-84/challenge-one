@@ -1,8 +1,7 @@
-import ArchiveTable from "./ArchiveTable";
-import Pagination from "./Pagination";
-import type { FileItem } from "../../Types/archive";
-
-import { useState, useMemo } from "react";
+import ArchiveTable from "./ArchiveTable"
+import Pagination from "./Pagination"
+import type { FileItem } from "../../Types/archive"
+import { useState, useMemo } from "react"
 
 const initialFiles: FileItem[] = [
   {
@@ -32,33 +31,26 @@ const initialFiles: FileItem[] = [
     icon: "cloud",
     size: "۲٫۹ مگابایت",
   },
-  // فرض کن تعداد زیاد هم اضافه میشه
-];
-
-const PAGE_SIZE_OPTIONS = [
-  { value: 5, label: "۵" },
-  { value: 10, label: "۱۰" },
-  { value: 20, label: "۲۰" },
-];
+]
 
 export default function ArchiveList() {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(PAGE_SIZE_OPTIONS[0].value);
+  const [currentPage, setCurrentPage] = useState(1)
+  const pageSize = 8
 
-  const totalPages = Math.ceil(initialFiles.length / pageSize);
+  const totalPages = Math.ceil(initialFiles.length / pageSize)
 
-  const startIndex = (currentPage - 1) * pageSize;
-  const endIndex = Math.min(startIndex + pageSize, initialFiles.length);
+  const startIndex = (currentPage - 1) * pageSize
+  const endIndex = Math.min(startIndex + pageSize, initialFiles.length)
 
   const paginatedFiles = useMemo(
     () => initialFiles.slice(startIndex, endIndex),
     [startIndex, endIndex]
-  );
+  )
 
   function getPageNumbers() {
-    const delta = 2;
-    const range: (number | string)[] = [];
-    let l = -1;
+    const delta = 2
+    const range: (number | string)[] = []
+    let l = -1
 
     for (let i = 1; i <= totalPages; i++) {
       if (
@@ -67,30 +59,25 @@ export default function ArchiveList() {
         (i >= currentPage - delta && i <= currentPage + delta)
       ) {
         if (l !== -1 && i - l > 1) {
-          range.push("...");
+          range.push("...")
         }
-        range.push(i);
-        l = i;
+        range.push(i)
+        l = i
       }
     }
-    return range;
+    return range
   }
 
   function handlePrevious() {
-    setCurrentPage((p) => Math.max(p - 1, 1));
+    setCurrentPage((p) => Math.max(p - 1, 1))
   }
 
   function handleNext() {
-    setCurrentPage((p) => Math.min(p + 1, totalPages));
+    setCurrentPage((p) => Math.min(p + 1, totalPages))
   }
 
   function handlePageChange(page: number) {
-    setCurrentPage(page);
-  }
-
-  function handlePageSizeChange(size: number) {
-    setPageSize(size);
-    setCurrentPage(1);
+    setCurrentPage(page)
   }
 
   return (
@@ -102,14 +89,11 @@ export default function ArchiveList() {
         onPrevious={handlePrevious}
         onNext={handleNext}
         onPageChange={handlePageChange}
-        pageSize={pageSize}
-        onPageSizeChange={handlePageSizeChange}
-        pageSizeOptions={PAGE_SIZE_OPTIONS}
         startIndex={startIndex}
         endIndex={endIndex}
         total={initialFiles.length}
         getPageNumbers={getPageNumbers}
       />
     </div>
-  );
+  )
 }

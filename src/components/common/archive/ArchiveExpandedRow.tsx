@@ -36,13 +36,14 @@ export default function ArchiveExpandedRow({ text, audioUrl }: Props) {
                 type="button"
                 aria-pressed={active}
                 onClick={() => setType(t)}
-                className="text-sm font-semibold text-gray-700 flex items-center gap-1 relative pb-1"
+                className={`text-sm font-semibold text-gray-700 flex items-center gap-1 relative pb-1 ${
+                  active
+                    ? "border-b-0 after:absolute after:-bottom-[12px] after:left-0 after:right-0 after:h-[1px] after:bg-black after:transition-all after:duration-300 after:ease-in-out"
+                    : "border-b-0 after:absolute after:-bottom-[12px] after:left-0 after:right-0 after:h-[1px] after:bg-transparent after:transition-all after:duration-300 after:ease-in-out"
+                }`}
               >
                 <Icon className="w-5 h-5" />
                 {label}
-                {active && (
-                  <span className="absolute bottom-0 left-0 right-0 h-[1px] bg-black" />
-                )}
               </button>
             )
           })}

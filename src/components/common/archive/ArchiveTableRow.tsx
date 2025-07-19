@@ -54,8 +54,7 @@ export default function ArchiveTableRow({ file }: { file: FileItem }) {
     <tr>
       <td colSpan={5} className="p-0">
         <div
-          onClick={() => setExpanded((prev) => !prev)}
-          className={`cursor-pointer bg-white rounded-[10px] transition-shadow duration-300 ${
+          className={`bg-white rounded-[10px] transition-shadow duration-300 ${
             expanded ? "shadow-[1px_2px_5px_rgba(0,0,0,0.05)] border" : ""
           }`}
           style={{
@@ -68,7 +67,10 @@ export default function ArchiveTableRow({ file }: { file: FileItem }) {
             >
               {icon.icon}
             </div>
-            <span className="truncate flex-1 mx-4 text-gray-700 text-sm">
+            <span
+              onClick={() => setExpanded((prev) => !prev)}
+              className="truncate flex-1 mx-4 text-gray-700 text-sm cursor-pointer"
+            >
               {file.name}
             </span>
             <div className="w-[12.5%] text-center text-sm text-gray-600">

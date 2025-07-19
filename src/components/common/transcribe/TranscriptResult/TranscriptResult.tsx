@@ -5,12 +5,11 @@ import AudioPlayer from "./AudioPlayer"
 import { ArrowPathIcon, Bars3Icon, ClockIcon } from "@heroicons/react/24/outline"
 
 type Props = {
-  type: "simple" | "timeline"
+  type: "simple" | "timeline";
   tab: "record" | "upload" | "link"
   audioUrl?: string
   text: string
   onReset: () => void
-  onChangeType?: (type: "simple" | "timeline") => void
 }
 
 const Tooltip = memo(({ children, text }: { children: React.ReactNode; text: string }) => {
@@ -39,7 +38,8 @@ const Tooltip = memo(({ children, text }: { children: React.ReactNode; text: str
   )
 })
 
-export default function TranscriptResult({ type, tab, audioUrl, text, onReset, onChangeType }: Props) {
+export default function TranscriptResult({ tab, audioUrl, text, onReset }: Props) {
+  const [type, setType] = useState<"simple" | "timeline">("simple")
   const [copied, setCopied] = useState(false)
 
   const copyToClipboard = useCallback(() => {
@@ -74,17 +74,21 @@ export default function TranscriptResult({ type, tab, audioUrl, text, onReset, o
         borderTopRightRadius: tab === "record" ? 0 : 16,
       }}
     >
-      <div className="flex justify-between items-center px-2 pb-5 border-b border-black/50">
+      <div className="flex justify-between items-center px-2 pb-3 border-b border-black/50">
         <div className="flex items-center gap-6 relative">
           {(["simple", "timeline"] as const).map((t) => {
             const active = type === t
             return (
               <button
                 key={t}
-                className="text-sm font-semibold text-gray-700 flex items-center gap-1 relative pb-1"
                 type="button"
                 aria-pressed={active}
-                onClick={() => onChangeType?.(t)}
+                onClick={() => setType(t)}
+                className={`text-sm font-semibold text-gray-700 flex items-center gap-1 relative pb-1 ${
+                  active
+                    ? "border-b-0 after:absolute after:-bottom-[17px] after:left-0 after:right-0 after:h-[1px] after:bg-black after:content-[''] after:block after:transition-all after:duration-300"
+                    : "after:content-['']"
+                }`}
               >
                 {t === "simple" ? (
                   <>
@@ -97,7 +101,6 @@ export default function TranscriptResult({ type, tab, audioUrl, text, onReset, o
                     متن زمان‌بندی شده
                   </>
                 )}
-                {active && <span className="absolute bottom-0 left-0 right-0 h-[1px] bg-black" />}
               </button>
             )
           })}

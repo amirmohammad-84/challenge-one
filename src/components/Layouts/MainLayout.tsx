@@ -48,7 +48,7 @@ function Sidebar() {
         <img src={logo} alt="logo" className="w-14 h-9" loading="lazy" />
       </div>
       <Link
-        to="/"
+        to="/dashboard"
         className={`absolute top-72 left-1/2 transform -translate-x-1/2 w-36 h-12 flex items-center justify-center rounded-xl px-4 cursor-pointer transition-opacity ${
           activeTab === "voice"
             ? "bg-[#02816E] text-white"

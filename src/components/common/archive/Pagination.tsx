@@ -1,19 +1,20 @@
-import React from "react";
+import React from "react"
+import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/solid"
 
 interface PaginationProps {
-  currentPage: number;
-  totalPages: number;
-  onPageChange: (page: number) => void;
-  onPrevious: () => void;
-  onNext: () => void;
-  pageSize: number;
-  onPageSizeChange: (size: number) => void;
-  pageSizeOptions: { value: number; label: string }[];
-  startIndex: number;
-  endIndex: number;
-  total: number;
-  getPageNumbers: () => (number | string)[];
+  currentPage: number
+  totalPages: number
+  onPageChange: (page: number) => void
+  onPrevious: () => void
+  onNext: () => void
+  startIndex: number
+  endIndex: number
+  total: number
+  getPageNumbers: () => (number | string)[]
 }
+
+const toPersianNumber = (num: number | string) =>
+  String(num).replace(/\d/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[parseInt(d)])
 
 const Pagination: React.FC<PaginationProps> = ({
   currentPage,
@@ -21,43 +22,37 @@ const Pagination: React.FC<PaginationProps> = ({
   onPageChange,
   onPrevious,
   onNext,
-  pageSize,
-  onPageSizeChange,
-  pageSizeOptions,
-  startIndex,
-  endIndex,
-  total,
   getPageNumbers,
 }) => (
-  <div className="flex flex-col md:flex-row items-start md:items-center justify-between mt-6 space-y-4 md:space-y-0">
-    <div className="flex items-center space-x-2 md:w-auto w-full justify-center">
+  <div className="mt-10 flex flex-col items-center justify-center space-y-4">
+    <div className="flex items-center space-x-1 rtl:space-x-reverse">
       <button
         onClick={onPrevious}
         disabled={currentPage === 1}
-        className={`px-3 py-1 rounded-md text-sm font-medium ${
-          currentPage === 1
-            ? "text-gray-400 cursor-not-allowed"
-            : "text-gray-700 hover:bg-gray-100"
+        className={`p-1.5 rounded-full ${
+          currentPage === 1 ? "text-gray-300 cursor-not-allowed" : "text-gray-800"
         }`}
       >
-        Previous
+        <ChevronRightIcon className="h-5 w-5" />
       </button>
 
-      <div className="flex space-x-1">
+      <div className="flex items-center justify-center">
         {getPageNumbers().map((page, idx) => (
           <React.Fragment key={idx}>
             {page === "..." ? (
-              <span className="px-3 py-1 text-gray-500 select-none">...</span>
+              <span className="px-2 py-1 text-gray-500 select-none">...</span>
             ) : (
               <button
                 onClick={() => onPageChange(page as number)}
-                className={`px-3 py-1 rounded-md text-sm font-medium ${
-                  currentPage === page
-                    ? "bg-blue-500 text-white"
-                    : "text-gray-700 hover:bg-gray-100"
-                }`}
+                className={`w-8 h-8 flex items-center justify-center rounded-full text-sm font-medium text-white`}
+                style={{
+                  backgroundColor:
+                    currentPage === page
+                      ? "rgba(0, 186, 159, 1)"
+                      : "rgba(0, 186, 159, 0.5)",
+                }}
               >
-                {page}
+                {toPersianNumber(page)}
               </button>
             )}
           </React.Fragment>
@@ -67,42 +62,14 @@ const Pagination: React.FC<PaginationProps> = ({
       <button
         onClick={onNext}
         disabled={currentPage === totalPages}
-        className={`px-3 py-1 rounded-md text-sm font-medium ${
-          currentPage === totalPages
-            ? "text-gray-400 cursor-not-allowed"
-            : "text-gray-700 hover:bg-gray-100"
+        className={`p-1.5 rounded-full ${
+          currentPage === totalPages ? "text-gray-300 cursor-not-allowed" : "text-gray-800"
         }`}
       >
-        Next
+        <ChevronLeftIcon className="h-5 w-5" />
       </button>
     </div>
-
-    <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4 md:w-auto w-full justify-between">
-      <div className="flex items-center space-x-2">
-        <label
-          htmlFor="pageSize"
-          className="text-sm text-gray-700 select-none"
-        >
-          Show:
-        </label>
-        <select
-          id="pageSize"
-          value={pageSize}
-          onChange={(e) => onPageSizeChange(Number(e.target.value))}
-          className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          {pageSizeOptions.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div className="text-sm text-gray-700">
-        Showing {startIndex + 1} to {endIndex} of {total} results
-      </div>
-    </div>
   </div>
-);
+)
 
-export default Pagination;
+export default Pagination
