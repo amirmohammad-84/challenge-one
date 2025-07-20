@@ -1,12 +1,14 @@
-import type { FC } from "react";
-import ArchiveTableRow from "./ArchiveTableRow";
-import type { FileItem } from "../../Types/archive";
+// src/components/archive/ArchiveTable.tsx
+import type { FC } from "react"
+import ArchiveTableRow from "./ArchiveTableRow"
+import type { FileItem } from "../../Types/archive"
 
 type Props = {
-  files: FileItem[];
-};
+  files: FileItem[]
+  onRemove: (id: string) => void
+}
 
-const ArchiveTable: FC<Props> = ({ files }) => {
+const ArchiveTable: FC<Props> = ({ files, onRemove }) => {
   return (
     <div className="overflow-x-auto">
       <table className="min-w-full text-right border-separate border-spacing-y-2">
@@ -29,12 +31,12 @@ const ArchiveTable: FC<Props> = ({ files }) => {
         </thead>
         <tbody>
           {files.map((file) => (
-            <ArchiveTableRow key={file.id} file={file} />
+            <ArchiveTableRow key={file.id} file={file} onRemove={onRemove} />
           ))}
         </tbody>
       </table>
     </div>
-  );
-};
+  )
+}
 
-export default ArchiveTable;
+export default ArchiveTable

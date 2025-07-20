@@ -1,4 +1,6 @@
 export type FileItem = {
+  transcript: string
+  audioUrl: string
   id: string
   name: string
   type: string

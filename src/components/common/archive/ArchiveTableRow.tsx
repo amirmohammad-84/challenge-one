@@ -1,10 +1,11 @@
-import { useState, useRef, useEffect, useMemo } from "react";
-import ArchiveExpandedRow from "./ArchiveExpandedRow";
-import { LinkIcon } from "@heroicons/react/24/outline";
-import micIcon from "../../../assets/mic2.svg";
-import cloudIcon from "../../../assets/cloud.svg";
-import ArchiveActions from "./ArchiveActions";
-import type { FileItem } from "../../Types/archive";
+// src/components/archive/ArchiveTableRow.tsx
+import { useState, useRef, useEffect, useMemo } from "react"
+import ArchiveExpandedRow from "./ArchiveExpandedRow"
+import { LinkIcon } from "@heroicons/react/24/outline"
+import micIcon from "../../../assets/mic2.svg"
+import cloudIcon from "../../../assets/cloud.svg"
+import ArchiveActions from "./ArchiveActions"
+import type { FileItem } from "../../Types/archive"
 
 const iconMap = {
   link: {
@@ -19,36 +20,42 @@ const iconMap = {
     icon: <img src={cloudIcon} alt="cloud" className="w-4 h-4" />,
     bg: "bg-[#118AD3]",
   },
-} as const;
+} as const
 
 const iconToTabMap = {
   link: "link",
   mic: "record",
   cloud: "upload",
-} as const;
+} as const
 
 const borderColors = {
   record: "#00BA9F",
   upload: "#118AD3",
   link: "#FF1654",
-} as const;
+} as const
 
-export default function ArchiveTableRow({ file }: { file: FileItem }) {
-  const [expanded, setExpanded] = useState(false);
-  const contentRef = useRef<HTMLDivElement>(null);
-  const [height, setHeight] = useState(0);
+export default function ArchiveTableRow({
+  file,
+  onRemove,
+}: {
+  file: FileItem
+  onRemove: (id: string) => void
+}) {
+  const [expanded, setExpanded] = useState(false)
+  const contentRef = useRef<HTMLDivElement>(null)
+  const [height, setHeight] = useState(0)
 
-  const icon = useMemo(() => iconMap[file.icon], [file.icon]);
-  const tab = useMemo(() => iconToTabMap[file.icon], [file.icon]);
-  const borderColor = useMemo(() => (expanded ? borderColors[tab] : "transparent"), [expanded, tab]);
+  const icon = useMemo(() => iconMap[file.icon], [file.icon])
+  const tab = useMemo(() => iconToTabMap[file.icon], [file.icon])
+  const borderColor = useMemo(() => (expanded ? borderColors[tab] : "transparent"), [expanded, tab])
 
   useEffect(() => {
     if (expanded && contentRef.current) {
-      setHeight(contentRef.current.scrollHeight);
+      setHeight(contentRef.current.scrollHeight)
     } else {
-      setHeight(0);
+      setHeight(0)
     }
-  }, [expanded]);
+  }, [expanded])
 
   return (
     <tr>
@@ -73,17 +80,15 @@ export default function ArchiveTableRow({ file }: { file: FileItem }) {
             >
               {file.name}
             </span>
-            <div className="w-[12.5%] text-center text-sm text-gray-600">
-              {file.date}
-            </div>
-            <div className="w-[12.5%] text-center text-sm text-gray-600">
-              .{file.type}
-            </div>
-            <div className="w-[12.5%] text-center text-sm text-gray-600">
-              {file.duration}
-            </div>
+            <div className="w-[12.5%] text-center text-sm text-gray-600">{file.date}</div>
+            <div className="w-[12.5%] text-center text-sm text-gray-600">.{file.type}</div>
+            <div className="w-[12.5%] text-center text-sm text-gray-600">{file.duration}</div>
             <div className="w-[12.5%] pr-1 flex justify-center">
-              <ArchiveActions size={file.size} />
+              <ArchiveActions
+                size={file.size}
+                textToHandle={file.transcript ?? ""}
+                onDelete={() => onRemove(file.id)}
+              />
             </div>
           </div>
           <div
@@ -95,13 +100,13 @@ export default function ArchiveTableRow({ file }: { file: FileItem }) {
             {expanded && (
               <ArchiveExpandedRow
                 tab={tab}
-                text="عشق! آره، این کلمه‌اش بود. خوبی تو، آرزو که دیگه‌م رو... [ادامه متن ترنسکرایب]"
-                audioUrl="/audios/sample.mp3"
+                text={file.transcript ?? "بدون متن"}
+                audioUrl={file.audioUrl ?? ""}
               />
             )}
           </div>
         </div>
       </td>
     </tr>
-  );
+  )
 }
