@@ -1,4 +1,3 @@
-// src/components/archive/ArchiveTableRow.tsx
 import { useState, useRef, useEffect, useMemo } from "react"
 import ArchiveExpandedRow from "./ArchiveExpandedRow"
 import { LinkIcon } from "@heroicons/react/24/outline"
@@ -64,14 +63,10 @@ export default function ArchiveTableRow({
           className={`bg-white rounded-[10px] transition-shadow duration-300 ${
             expanded ? "shadow-[1px_2px_5px_rgba(0,0,0,0.05)] border" : ""
           }`}
-          style={{
-            border: `1px solid ${borderColor}`,
-          }}
+          style={{ border: `1px solid ${borderColor}` }}
         >
           <div className="flex items-center px-3 h-12 select-none">
-            <div
-              className={`w-8 h-8 rounded-full flex items-center justify-center ${icon.bg} flex-shrink-0`}
-            >
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${icon.bg} flex-shrink-0`}>
               {icon.icon}
             </div>
             <span

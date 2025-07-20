@@ -34,7 +34,6 @@ function Sidebar() {
   const location = useLocation();
   const activeTab = location.pathname === "/archive" ? "archive" : "voice";
 
-  // نکته: مقدار کلاس `text-white` در اسپن‌ها تکراریه، فقط یک‌بار اضافه کن
 
   return (
     <div className="hidden lg:flex relative w-44 bg-[#00BA9F] text-white rounded-tl-xl rounded-bl-xl min-h-screen">

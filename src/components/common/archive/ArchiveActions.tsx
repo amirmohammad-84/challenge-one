@@ -65,7 +65,7 @@ const ArchiveActions: FC<Props> = ({ size, textToHandle, onDelete }) => {
         <div
           title={`حجم فایل: ${size}`}
           onClick={downloadTxt}
-          className="w-6 h-6 flex items-center justify-center rounded-full cursor-pointer hover:bg-gray-200 hover:brightness-90 group transition"
+          className="p-[6px] w-6 h-6 flex items-center justify-center rounded-full cursor-pointer hover:bg-gray-200 hover:brightness-90 group transition"
         >
           <img
             src={downloadIcon}
@@ -78,7 +78,7 @@ const ArchiveActions: FC<Props> = ({ size, textToHandle, onDelete }) => {
         <div
           title="word"
           onClick={downloadWord}
-          className="w-6 h-6 flex items-center justify-center rounded-full cursor-pointer hover:bg-gray-200 hover:brightness-90 group transition"
+          className="p-[6px] w-6 h-6 flex items-center justify-center rounded-full cursor-pointer hover:bg-gray-200 hover:brightness-90 group transition"
         >
           <img
             src={wordIcon}
@@ -91,7 +91,7 @@ const ArchiveActions: FC<Props> = ({ size, textToHandle, onDelete }) => {
         <div
           title={copied ? "کپی شد" : "copy"}
           onClick={copyText}
-          className={`w-6 h-6 flex items-center justify-center rounded-full cursor-pointer hover:bg-gray-200 hover:brightness-90 group transition ${
+          className={`p-[6px] w-6 h-6 flex items-center justify-center rounded-full cursor-pointer hover:bg-gray-200 hover:brightness-90 group transition ${
             copied ? "bg-green-200" : ""
           }`}
         >
@@ -106,7 +106,7 @@ const ArchiveActions: FC<Props> = ({ size, textToHandle, onDelete }) => {
         <div
           title="حذف"
           onClick={openModal}
-          className="w-6 h-6 flex items-center justify-center rounded-full cursor-pointer hover:bg-red-500 hover:brightness-90 group group-hover:brightness-0 group-hover:invert transition"
+          className="p-[6px] w-6 h-6 flex items-center justify-center rounded-full cursor-pointer hover:bg-red-500 hover:brightness-90 group group-hover:brightness-0 group-hover:invert transition"
         >
           <img
             src={trashIcon}
@@ -126,7 +126,7 @@ const ArchiveActions: FC<Props> = ({ size, textToHandle, onDelete }) => {
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="bg-white rounded-lg p-5 w-[320px] text-center shadow-xl animate-fadeIn"
+            className="p-[6px] bg-white rounded-lg p-5 w-[320px] text-center shadow-xl animate-fadeIn"
             style={{ animationDuration: "0.25s", animationTimingFunction: "ease-out" }}
           >
             <p className="mb-6 text-gray-800">آیا از حذف این مورد مطمئن هستید؟</p>

@@ -1,49 +1,14 @@
 import ArchiveTable from "./ArchiveTable"
 import Pagination from "./Pagination"
 import type { FileItem } from "../../Types/archive"
-import { useState, useMemo } from "react"
-
-const initialFiles: FileItem[] = [
-  {
-    id: "1",
-    name: "khaterate To",
-    type: "mp4",
-    date: "۱۴۰۲/۰۷/۱۲",
-    duration: "۴:۳۸",
-    icon: "link",
-    size: "۳٫۱ مگابایت",
-    transcript: "متن ترنسکرایب یا توضیح فایل ۱",
-    audioUrl: "/audios/sample1.mp3",
-  },
-  {
-    id: "2",
-    name: "پادکست سروش",
-    type: "mp3",
-    date: "۱۴۰۲/۰۳/۲۱",
-    duration: "۱۸:۱۸",
-    icon: "mic",
-    size: "۳٫۱۸ مگابایت",
-    transcript: "متن ترنسکرایب یا توضیح فایل ۲",
-    audioUrl: "/audios/sample2.mp3",
-  },
-  {
-    id: "3",
-    name: "Sirvan Khosravi",
-    type: "wav",
-    date: "۱۴۰۲/۰۲/۱۹",
-    duration: "۵:۱۲",
-    icon: "cloud",
-    size: "۲٫۹ مگابایت",
-    transcript: "متن ترنسکرایب یا توضیح فایل ۳",
-    audioUrl: "/audios/sample3.mp3",
-  },
-]
+import { useState, useMemo, useEffect } from "react"
 
 export default function ArchiveList() {
-  const [files, setFiles] = useState<FileItem[]>(initialFiles)
+  const [files, setFiles] = useState<FileItem[]>([])
   const [currentPage, setCurrentPage] = useState(1)
-  const pageSize = 8
+  const [loading, setLoading] = useState(true)
 
+  const pageSize = 8
   const totalPages = Math.ceil(files.length / pageSize)
 
   const startIndex = (currentPage - 1) * pageSize
@@ -53,6 +18,52 @@ export default function ArchiveList() {
     () => files.slice(startIndex, endIndex),
     [files, startIndex, endIndex]
   )
+
+  useEffect(() => {
+    async function fetchFiles() {
+      try {
+        const res = await fetch("/api/transcribe")
+        const data = await res.json()
+
+        if (Array.isArray(data) && data.length > 0) {
+          setFiles(data)
+        } else {
+          setFiles([
+            {
+              id: "mock-1",
+              name: "فایل تستی بیس",
+              type: "mp3",
+              date: "۱۴۰۳/۰۴/۱۰",
+              duration: "۳:۴۵",
+              icon: "mic",
+              size: "۲٫۵ مگابایت",
+              transcript: "این یک نمونه‌ی ترنسکرایب شده است.",
+              audioUrl: "/audios/sample1.mp3",
+            },
+          ])
+        }
+      } catch (error) {
+        console.error("خطا در دریافت فایل‌ها:", error)
+        setFiles([
+          {
+            id: "mock-1",
+            name: "فایل تستی خطا",
+            type: "mp3",
+            date: "۱۴۰۳/۰۴/۱۰",
+            duration: "۳:۴۵",
+            icon: "mic",
+            size: "۲٫۵ مگابایت",
+            transcript: "این یک نمونه‌ی ترنسکرایب شده است.",
+            audioUrl: "/audios/sample1.mp3",
+          },
+        ])
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchFiles()
+  }, [])
 
   function getPageNumbers() {
     const delta = 2
@@ -66,7 +77,7 @@ export default function ArchiveList() {
         (i >= currentPage - delta && i <= currentPage + delta)
       ) {
         if (l !== -1 && i - l > 1) {
-          range.push("...")
+          range.push("…")
         }
         range.push(i)
         l = i
@@ -96,18 +107,26 @@ export default function ArchiveList() {
 
   return (
     <div className="mt-20 px-4 max-w-6xl mx-auto">
-      <ArchiveTable files={paginatedFiles} onRemove={handleRemove} />
-      <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPrevious={handlePrevious}
-        onNext={handleNext}
-        onPageChange={handlePageChange}
-        startIndex={startIndex}
-        endIndex={endIndex}
-        total={files.length}
-        getPageNumbers={getPageNumbers}
-      />
+      {loading ? (
+        <div className="text-center py-10 text-gray-500">در حال بارگذاری...</div>
+      ) : files.length === 0 ? (
+        <div className="text-center py-10 text-gray-500">هیچ آرشیوی موجود نیست.</div>
+      ) : (
+        <>
+          <ArchiveTable files={paginatedFiles} onRemove={handleRemove} />
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPrevious={handlePrevious}
+            onNext={handleNext}
+            onPageChange={handlePageChange}
+            startIndex={startIndex}
+            endIndex={endIndex}
+            total={files.length}
+            getPageNumbers={getPageNumbers}
+          />
+        </>
+      )}
     </div>
   )
 }

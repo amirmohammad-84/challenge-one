@@ -1,15 +1,15 @@
-import { useState, useRef, useCallback, memo } from "react"
+import { useState, useEffect, useRef, useCallback, memo } from "react"
 import SimpleTranscript from "./SimpleTranscript"
 import TimelineTranscript from "./TimelineTranscript"
 import AudioPlayer from "./AudioPlayer"
 import { ArrowPathIcon, Bars3Icon, ClockIcon } from "@heroicons/react/24/outline"
+import { transcribeMedia } from "../../../../api/callApi"
 
 type Props = {
   type: "simple" | "timeline";
-  tab: "record" | "upload" | "link"
-  audioUrl?: string
-  text: string
-  onReset: () => void
+  tab: "record" | "upload" | "link";
+  audioUrl?: string;
+  onReset: () => void;
 }
 
 const Tooltip = memo(({ children, text }: { children: React.ReactNode; text: string }) => {
@@ -38,9 +38,12 @@ const Tooltip = memo(({ children, text }: { children: React.ReactNode; text: str
   )
 })
 
-export default function TranscriptResult({ tab, audioUrl, text, onReset }: Props) {
+export default function TranscriptResult({ tab, audioUrl, onReset }: Props) {
   const [type, setType] = useState<"simple" | "timeline">("simple")
   const [copied, setCopied] = useState(false)
+  const [text, setText] = useState("")
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   const copyToClipboard = useCallback(() => {
     navigator.clipboard.writeText(text)
@@ -63,6 +66,23 @@ export default function TranscriptResult({ tab, audioUrl, text, onReset }: Props
     upload: "#118AD3",
     link: "#FF1654",
   }[tab]
+
+  useEffect(() => {
+    if (!audioUrl) return
+    setLoading(true)
+    setError(null)
+
+    transcribeMedia(audioUrl)
+      .then((res) => {
+        const finalText = res?.text || res?.[0]?.text || "نتیجه‌ای یافت نشد"
+        setText(finalText)
+      })
+      .catch(() => {
+        setError("خطا در پردازش فایل")
+        setText("")
+      })
+      .finally(() => setLoading(false))
+  }, [audioUrl])
 
   return (
     <div
@@ -113,6 +133,7 @@ export default function TranscriptResult({ tab, audioUrl, text, onReset }: Props
               className="flex items-center p-1 rounded hover:bg-gray-100"
               aria-label="کپی"
               type="button"
+              disabled={!text}
             >
               <img src="/src/assets/copy.svg" className="w-5 h-5" />
             </button>
@@ -123,6 +144,7 @@ export default function TranscriptResult({ tab, audioUrl, text, onReset }: Props
               className="flex items-center p-1 rounded hover:bg-gray-100"
               aria-label="دانلود"
               type="button"
+              disabled={!text}
             >
               <img src="/src/assets/download.svg" className="w-5 h-5" />
             </button>
@@ -144,7 +166,9 @@ export default function TranscriptResult({ tab, audioUrl, text, onReset }: Props
 
       <div className="flex flex-col justify-between flex-grow">
         <div className="px-2 overflow-y-auto pt-4" style={{ maxHeight: 429 - 80 - 52 }}>
-          {type === "simple" ? <SimpleTranscript text={text} /> : <TimelineTranscript text={text} />}
+          {loading && <p className="text-gray-500">در حال دریافت متن...</p>}
+          {error && <p className="text-red-500">{error}</p>}
+          {!loading && !error && (type === "simple" ? <SimpleTranscript text={text} /> : <TimelineTranscript text={text} />)}
         </div>
         {audioUrl && (
           <div className="mt-2">

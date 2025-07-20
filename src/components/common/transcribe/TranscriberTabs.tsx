@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState, useMemo, useEffect, useRef } from "react";
 import {
   MicrophoneIcon,
@@ -12,8 +14,7 @@ import { TranscriberInput } from "./TranscriberInput";
 import type { TabConfig } from "../../Types/transcriber";
 import Footer from "../Footer";
 import TranscriptResult from "./TranscriptResult/TranscriptResult";
-
-const rawText = `[با][---][---] [با] و[---][---] [با][---][---][---][---] کجایی تو [خوش] می دیدی من خسته شدم [ما را] [به] این [زودی] چه جوری شد [عشق شدی] به این است[---] [آخرش] سی با فکر [و] چقدر [نزار می خوام] که [چشم تو] [و با رفت][---][---][---][---][---][---][---][---] سخت [آرام] ولی ازت می خوام[---] بر نگردی هر کسی که به [تو] باشه[---] کاشکی تو منو [بردی] [که چشمک][---] با[---][---][---][---][---] [ابو][---] [با] و و و و و [او]`;
+import { transcribeMedia } from "../../../api/callApi";
 
 export default function TranscriberTabs() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -28,8 +29,8 @@ export default function TranscriberTabs() {
   );
 
   const [submitted, setSubmitted] = useState(false);
-
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [transcriptText, setTranscriptText] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -38,18 +39,30 @@ export default function TranscriberTabs() {
       setActiveTab(tabFromQuery);
       setSubmitted(false);
       setAudioUrl(null);
+      setTranscriptText(null);
     }
   }, [tabFromQuery]);
 
-  const handleSend = (blobUrl?: string) => {
+  const handleSend = async (blobUrl?: string) => {
     setAudioUrl(blobUrl || null);
     setSubmitted(true);
+
+    if (blobUrl) {
+      try {
+        const response = await transcribeMedia(blobUrl);
+        const finalText = response?.text || response?.[0]?.text || "نتیجه‌ای یافت نشد";
+        setTranscriptText(finalText);
+      } catch (err) {
+        setTranscriptText("خطا در پردازش فایل.");
+      }
+    }
   };
 
   const handleTabClick = (tabId: "record" | "upload" | "link") => {
     setActiveTab(tabId);
     setSubmitted(false);
     setAudioUrl(null);
+    setTranscriptText(null);
     setSearchParams({ tab: tabId });
   };
 
@@ -108,7 +121,7 @@ export default function TranscriberTabs() {
           و دکمه را فشار دهید
         </>
       ),
-      input: <TranscriberInput color="#FF1654" onSubmit={() => handleSend()} />,
+      input: <TranscriberInput color="#FF1654" onSubmit={(url) => handleSend(url)} />,
     },
   ];
 
@@ -140,12 +153,11 @@ export default function TranscriberTabs() {
             <TranscriptResult
               type="simple"
               audioUrl={audioUrl ?? undefined}
-              text={rawText}
-              onReset={() => {
-                setSubmitted(false);
-                setAudioUrl(null);
-              }}
               tab={activeTab}
+              onReset={() => {
+                setSubmitted(false)
+                setAudioUrl(null)
+              }}
             />
           ) : (
             <>

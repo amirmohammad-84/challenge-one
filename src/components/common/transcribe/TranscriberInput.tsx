@@ -3,7 +3,7 @@ import { useState } from "react"
 
 type Props = {
   color: string
-  onSubmit: () => void
+  onSubmit: (url: string) => Promise<void>;
 }
 
 const audioExtensions = ["mp3", "wav", "aac", "flac", "ogg"]
@@ -24,7 +24,7 @@ export function TranscriberInput({ color, onSubmit }: Props) {
 
   const handleSubmit = () => {
     if (!isValidMediaLink(inputValue)) return
-    onSubmit()
+    onSubmit(inputValue)
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {

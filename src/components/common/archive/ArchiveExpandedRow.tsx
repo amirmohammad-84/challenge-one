@@ -19,14 +19,8 @@ export default function ArchiveExpandedRow({ text, audioUrl }: Props) {
   const [type, setType] = useState<"simple" | "timeline">("simple")
 
   return (
-    <div
-      className="w-full bg-white px-4 py-4 mt-2 rounded-[10px]"
-      style={{ height: 371 }}
-    >
-      <div
-        className="flex justify-between items-center px-2 pb-3"
-        style={{ borderBottom: "0.25px solid rgba(0,0,0,0.5)" }}
-      >
+    <div className="w-full bg-white px-4 py-4 mt-2 rounded-[10px]" style={{ height: 371 }}>
+      <div className="flex justify-between items-center px-2 pb-3" style={{ borderBottom: "0.25px solid rgba(0,0,0,0.5)" }}>
         <div className="flex items-center gap-6 relative">
           {transcriptTypes.map(({ type: t, label, Icon }) => {
             const active = type === t
