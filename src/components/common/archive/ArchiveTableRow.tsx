@@ -46,7 +46,10 @@ export default function ArchiveTableRow({
 
   const icon = useMemo(() => iconMap[file.icon], [file.icon])
   const tab = useMemo(() => iconToTabMap[file.icon], [file.icon])
-  const borderColor = useMemo(() => (expanded ? borderColors[tab] : "transparent"), [expanded, tab])
+  const borderColor = useMemo(
+    () => (expanded ? borderColors[tab] : "transparent"),
+    [expanded, tab]
+  )
 
   useEffect(() => {
     if (expanded && contentRef.current) {
@@ -66,7 +69,9 @@ export default function ArchiveTableRow({
           style={{ border: `1px solid ${borderColor}` }}
         >
           <div className="flex items-center px-3 h-12 select-none">
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${icon.bg} flex-shrink-0`}>
+            <div
+              className={`w-8 h-8 rounded-full flex items-center justify-center ${icon.bg} flex-shrink-0`}
+            >
               {icon.icon}
             </div>
             <span
@@ -81,6 +86,7 @@ export default function ArchiveTableRow({
             <div className="w-[12.5%] pr-1 flex justify-center">
               <ArchiveActions
                 size={file.size}
+                id={Number(file.id)}
                 textToHandle={file.transcript ?? ""}
                 onDelete={() => onRemove(file.id)}
               />
@@ -97,6 +103,7 @@ export default function ArchiveTableRow({
                 tab={tab}
                 text={file.transcript ?? "بدون متن"}
                 audioUrl={file.audioUrl ?? ""}
+                segments={file.segments ?? []}
               />
             )}
           </div>

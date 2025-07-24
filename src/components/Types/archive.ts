@@ -1,4 +1,11 @@
+type Segment = {
+  start: number
+  end: number
+  text: string
+}
+
 export type FileItem = {
+  segments?: Segment[]
   transcript: string
   audioUrl: string
   id: string

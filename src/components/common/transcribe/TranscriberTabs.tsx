@@ -1,81 +1,100 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect, useRef } from "react"
 import {
   MicrophoneIcon,
   ArrowUpTrayIcon,
   LinkIcon,
-} from "@heroicons/react/24/solid";
-import { useSearchParams } from "react-router-dom";
+} from "@heroicons/react/24/solid"
+import { useSearchParams } from "react-router-dom"
 
-import TabButton from "./TabButton";
-import TranscriberCard from "./TranscriberCard";
-import { TranscriberInput } from "./TranscriberInput";
-import type { TabConfig } from "../../Types/transcriber";
-import Footer from "../Footer";
-import TranscriptResult from "./TranscriptResult/TranscriptResult";
-import { transcribeMedia } from "../../../api/callApi";
+import TabButton from "./TabButton"
+import TranscriberCard from "./TranscriberCard"
+import { TranscriberInput } from "./TranscriberInput"
+import type { TabConfig } from "../../Types/transcriber"
+import Footer from "../Footer"
+import TranscriptResult from "./TranscriptResult/TranscriptResult"
+import { transcribeMedia } from "../../../api/callApi"
+
+type Segment = {
+  start: number
+  end: number
+  text: string
+}
 
 export default function TranscriberTabs() {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const tabFromQuery = searchParams.get("tab") as
-    | "record"
-    | "upload"
-    | "link"
-    | null;
+  const [searchParams, setSearchParams] = useSearchParams()
+  const tabFromQuery = searchParams.get("tab") as "record" | "upload" | "link" | null
 
   const [activeTab, setActiveTab] = useState<"record" | "upload" | "link">(
     tabFromQuery ?? "record"
-  );
+  )
 
-  const [submitted, setSubmitted] = useState(false);
-  const [audioUrl, setAudioUrl] = useState<string | null>(null);
-  const [transcriptText, setTranscriptText] = useState<string | null>(null);
+  const [submitted, setSubmitted] = useState(false)
+  const [audioUrl, setAudioUrl] = useState<string | null>(null)
+  const [, setTranscriptText] = useState<string | null>(null)
+  const [segments, setSegments] = useState<Segment[] | null>(null)
 
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const isSendingRef = useRef(false)
 
   useEffect(() => {
     if (tabFromQuery && tabFromQuery !== activeTab) {
-      setActiveTab(tabFromQuery);
-      setSubmitted(false);
-      setAudioUrl(null);
-      setTranscriptText(null);
+      setActiveTab(tabFromQuery)
+      setSubmitted(false)
+      setAudioUrl(null)
+      setTranscriptText(null)
+      setSegments(null)
     }
-  }, [tabFromQuery]);
+  }, [tabFromQuery])
 
   const handleSend = async (blobUrl?: string) => {
-    setAudioUrl(blobUrl || null);
-    setSubmitted(true);
+    if (isSendingRef.current) return
+    isSendingRef.current = true
+
+    setAudioUrl(blobUrl || null)
+    setSubmitted(true)
 
     if (blobUrl) {
       try {
-        const response = await transcribeMedia(blobUrl);
-        const finalText = response?.text || response?.[0]?.text || "نتیجه‌ای یافت نشد";
-        setTranscriptText(finalText);
-      } catch (err) {
-        setTranscriptText("خطا در پردازش فایل.");
+        const response = await transcribeMedia(blobUrl)
+        const finalText = response?.text || response?.[0]?.text || "نتیجه‌ای یافت نشد"
+        const finalSegmentsRaw = response?.segments || response?.[0]?.segments || null
+
+        const finalSegments: Segment[] | null = Array.isArray(finalSegmentsRaw)
+          ? (finalSegmentsRaw as Segment[])
+          : null
+
+        setTranscriptText(finalText)
+        setSegments(finalSegments)
+      } catch {
+        setTranscriptText("خطا در پردازش فایل.")
+        setSegments(null)
+      } finally {
+        isSendingRef.current = false
       }
+    } else {
+      isSendingRef.current = false
     }
-  };
+  }
 
   const handleTabClick = (tabId: "record" | "upload" | "link") => {
-    setActiveTab(tabId);
-    setSubmitted(false);
-    setAudioUrl(null);
-    setTranscriptText(null);
-    setSearchParams({ tab: tabId });
-  };
+    setActiveTab(tabId)
+    setSubmitted(false)
+    setAudioUrl(null)
+    setTranscriptText(null)
+    setSegments(null)
+    setSearchParams({ tab: tabId })
+  }
 
   const handleUploadClick = () => {
-    fileInputRef.current?.click();
-  };
+    fileInputRef.current?.click()
+  }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const url = URL.createObjectURL(file);
-    handleSend(url);
-  };
+    const file = e.target.files?.[0]
+    if (!file) return
+    const url = URL.createObjectURL(file)
+    handleSend(url)
+  }
 
   const tabs: TabConfig[] = [
     {
@@ -123,12 +142,12 @@ export default function TranscriberTabs() {
       ),
       input: <TranscriberInput color="#FF1654" onSubmit={(url) => handleSend(url)} />,
     },
-  ];
+  ]
 
   const currentTab = useMemo(
     () => tabs.find((tab) => tab.id === activeTab)!,
     [activeTab]
-  );
+  )
 
   return (
     <div className="flex flex-col items-center">
@@ -138,9 +157,7 @@ export default function TranscriberTabs() {
             <TabButton
               key={tab.id}
               active={activeTab === tab.id}
-              onClick={() =>
-                handleTabClick(tab.id as "record" | "upload" | "link")
-              }
+              onClick={() => handleTabClick(tab.id)}
               icon={tab.icon}
               label={tab.label}
               activeColor={tab.color}
@@ -154,9 +171,12 @@ export default function TranscriberTabs() {
               type="simple"
               audioUrl={audioUrl ?? undefined}
               tab={activeTab}
+              segments={segments ?? undefined}
               onReset={() => {
                 setSubmitted(false)
                 setAudioUrl(null)
+                setTranscriptText(null)
+                setSegments(null)
               }}
             />
           ) : (
@@ -210,5 +230,5 @@ export default function TranscriberTabs() {
         </div>
       </div>
     </div>
-  );
+  )
 }

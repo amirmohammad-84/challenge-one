@@ -3,16 +3,27 @@ import wordIcon from "../../../assets/word.svg"
 import copyIcon from "../../../assets/copy.svg"
 import trashIcon from "../../../assets/trash.svg"
 import downloadIcon from "../../../assets/download.svg"
+import { deleteRequest, getRequestDetail } from "../../../api/callApi"
 
 type Props = {
   size: string
   textToHandle: string
+  id: number
   onDelete: () => void
 }
 
-const ArchiveActions: FC<Props> = ({ size, textToHandle, onDelete }) => {
+const ArchiveActions: FC<Props> = ({ size, textToHandle, id, onDelete }) => {
   const [showModal, setShowModal] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [text, setText] = useState(textToHandle)
+
+  useEffect(() => {
+    setText(textToHandle)
+  }, [textToHandle])
+
+  useEffect(() => {
+    fetchAndSetTextFromSegments()
+  }, [id])
 
   useEffect(() => {
     if (!copied) return
@@ -20,15 +31,27 @@ const ArchiveActions: FC<Props> = ({ size, textToHandle, onDelete }) => {
     return () => clearTimeout(timer)
   }, [copied])
 
+  const fetchAndSetTextFromSegments = async () => {
+    try {
+      const data = await getRequestDetail(id)
+      if (Array.isArray(data.segments)) {
+        const combinedText = data.segments.map((seg: { text: string }) => seg.text).join(" ")
+        setText(combinedText)
+      }
+    } catch (error) {
+      console.error("خطا در دریافت جزئیات:", error)
+    }
+  }
+
   const copyText = async () => {
     try {
-      await navigator.clipboard.writeText(textToHandle)
+      await navigator.clipboard.writeText(text)
       setCopied(true)
     } catch { /* empty */ }
   }
 
   const downloadTxt = () => {
-    const blob = new Blob([textToHandle], { type: "text/plain" })
+    const blob = new Blob([text], { type: "text/plain" })
     const url = URL.createObjectURL(blob)
     const a = document.createElement("a")
     a.href = url
@@ -41,7 +64,7 @@ const ArchiveActions: FC<Props> = ({ size, textToHandle, onDelete }) => {
     const htmlContent = `
       <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
       <head><meta charset='utf-8'><title>Document</title></head>
-      <body>${textToHandle.replace(/\n/g, "<br>")}</body></html>
+      <body>${text.replace(/\n/g, "<br>")}</body></html>
     `
     const blob = new Blob([htmlContent], { type: "application/msword" })
     const url = URL.createObjectURL(blob)
@@ -54,9 +77,16 @@ const ArchiveActions: FC<Props> = ({ size, textToHandle, onDelete }) => {
 
   const openModal = () => setShowModal(true)
   const closeModal = () => setShowModal(false)
-  const confirmDelete = () => {
-    onDelete()
-    closeModal()
+
+  const confirmDelete = async () => {
+    try {
+      await deleteRequest(id)
+      onDelete()
+      closeModal()
+    } catch (error) {
+      console.error("خطا در حذف:", error)
+      closeModal()
+    }
   }
 
   return (

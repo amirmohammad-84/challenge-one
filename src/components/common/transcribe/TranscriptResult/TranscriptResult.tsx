@@ -1,15 +1,21 @@
-import { useState, useEffect, useRef, useCallback, memo } from "react"
+import { useState, useRef, useEffect, useCallback, memo } from "react"
 import SimpleTranscript from "./SimpleTranscript"
 import TimelineTranscript from "./TimelineTranscript"
 import AudioPlayer from "./AudioPlayer"
 import { ArrowPathIcon, Bars3Icon, ClockIcon } from "@heroicons/react/24/outline"
-import { transcribeMedia } from "../../../../api/callApi"
+
+type Segment = {
+  start: number
+  end: number
+  text: string
+}
 
 type Props = {
-  type: "simple" | "timeline";
-  tab: "record" | "upload" | "link";
-  audioUrl?: string;
-  onReset: () => void;
+  type?: "simple" | "timeline"
+  tab: "record" | "upload" | "link"
+  audioUrl?: string
+  segments?: Segment[]
+  onReset: () => void
 }
 
 const Tooltip = memo(({ children, text }: { children: React.ReactNode; text: string }) => {
@@ -38,12 +44,17 @@ const Tooltip = memo(({ children, text }: { children: React.ReactNode; text: str
   )
 })
 
-export default function TranscriptResult({ tab, audioUrl, onReset }: Props) {
-  const [type, setType] = useState<"simple" | "timeline">("simple")
+export default function TranscriptResult({ tab, audioUrl, segments = [], onReset, type: initialType = "simple" }: Props) {
+  const [type, setType] = useState<"simple" | "timeline">(initialType)
   const [copied, setCopied] = useState(false)
-  const [text, setText] = useState("")
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 6000)
+    return () => clearTimeout(timer)
+  }, [])
+
+  const text = segments.map((s) => s.text).join(" ")
 
   const copyToClipboard = useCallback(() => {
     navigator.clipboard.writeText(text)
@@ -66,23 +77,6 @@ export default function TranscriptResult({ tab, audioUrl, onReset }: Props) {
     upload: "#118AD3",
     link: "#FF1654",
   }[tab]
-
-  useEffect(() => {
-    if (!audioUrl) return
-    setLoading(true)
-    setError(null)
-
-    transcribeMedia(audioUrl)
-      .then((res) => {
-        const finalText = res?.text || res?.[0]?.text || "نتیجه‌ای یافت نشد"
-        setText(finalText)
-      })
-      .catch(() => {
-        setError("خطا در پردازش فایل")
-        setText("")
-      })
-      .finally(() => setLoading(false))
-  }, [audioUrl])
 
   return (
     <div
@@ -166,9 +160,15 @@ export default function TranscriptResult({ tab, audioUrl, onReset }: Props) {
 
       <div className="flex flex-col justify-between flex-grow">
         <div className="px-2 overflow-y-auto pt-4" style={{ maxHeight: 429 - 80 - 52 }}>
-          {loading && <p className="text-gray-500">در حال دریافت متن...</p>}
-          {error && <p className="text-red-500">{error}</p>}
-          {!loading && !error && (type === "simple" ? <SimpleTranscript text={text} /> : <TimelineTranscript text={text} />)}
+          {isLoading ? (
+            <p className="text-gray-500 text-center">در حال بارگذاری...</p>
+          ) : segments.length === 0 ? (
+            <p className="text-gray-500">متنی وجود ندارد</p>
+          ) : type === "simple" ? (
+            <SimpleTranscript segments={segments} />
+          ) : (
+            <TimelineTranscript segments={segments} />
+          )}
         </div>
         {audioUrl && (
           <div className="mt-2">

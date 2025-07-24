@@ -1,11 +1,19 @@
-type Props = {
+type Segment = {
+  start: number
+  end: number
   text: string
 }
 
-export default function SimpleTranscript({ text }: Props) {
+type Props = {
+  segments: Segment[]
+}
+
+export default function SimpleTranscript({ segments }: Props) {
+  const combinedText = segments.map(s => s.text).join(" ")
+
   return (
     <div className="w-full text-right text-sm leading-7 px-2 whitespace-pre-wrap">
-      {text}
+      {combinedText}
     </div>
   )
 }

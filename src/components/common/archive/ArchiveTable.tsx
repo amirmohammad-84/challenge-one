@@ -1,4 +1,3 @@
-// src/components/archive/ArchiveTable.tsx
 import type { FC } from "react"
 import ArchiveTableRow from "./ArchiveTableRow"
 import type { FileItem } from "../../Types/archive"
@@ -31,7 +30,11 @@ const ArchiveTable: FC<Props> = ({ files, onRemove }) => {
         </thead>
         <tbody>
           {files.map((file) => (
-            <ArchiveTableRow key={file.id} file={file} onRemove={onRemove} />
+            <ArchiveTableRow
+              key={file.id}
+              file={file}
+              onRemove={onRemove}
+            />
           ))}
         </tbody>
       </table>

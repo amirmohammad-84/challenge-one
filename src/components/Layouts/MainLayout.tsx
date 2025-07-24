@@ -36,7 +36,12 @@ function Sidebar() {
 
 
   return (
-    <div className="hidden lg:flex relative w-44 bg-[#00BA9F] text-white rounded-tl-xl rounded-bl-xl min-h-screen">
+    <div
+      className="hidden lg:flex relative w-44 text-white rounded-tl-xl rounded-bl-xl min-h-screen"
+      style={{
+        background: "linear-gradient(to bottom, rgba(0, 181, 160, 1), rgba(0, 198, 155, 1))",
+      }}
+    >
       <img
         src={asideImage}
         alt="aside-typography"

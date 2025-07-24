@@ -44,12 +44,11 @@ const Pagination: React.FC<PaginationProps> = ({
             ) : (
               <button
                 onClick={() => onPageChange(page as number)}
-                className={`w-8 h-8 flex items-center justify-center rounded-full text-sm font-medium text-white`}
+                className={`w-8 h-8 flex items-center justify-center rounded-full text-sm font-medium ${
+                  currentPage === page ? "text-white" : "text-black"
+                }`}
                 style={{
-                  backgroundColor:
-                    currentPage === page
-                      ? "rgba(0, 186, 159, 1)"
-                      : "rgba(0, 186, 159, 0.5)",
+                  backgroundColor: currentPage === page ? "rgba(0, 186, 159, 1)" : "",
                 }}
               >
                 {toPersianNumber(page)}
