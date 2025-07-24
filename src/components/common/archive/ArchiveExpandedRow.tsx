@@ -23,8 +23,6 @@ const transcriptTypes = [
 ] as const
 
 export default function ArchiveExpandedRow({
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  text,
   audioUrl,
   segments = [],
 }: Props) {
