@@ -12,7 +12,7 @@ export type FileItem = {
   name: string
   type: string
   date: string
-  duration: string
+  duration: number
   icon: "link" | "mic" | "cloud"
   size: string
 }

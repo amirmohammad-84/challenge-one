@@ -1,4 +1,4 @@
-import { useState, useEffect, type FC } from "react"
+import { useState, type FC } from "react"
 import wordIcon from "../../../assets/word.svg"
 import copyIcon from "../../../assets/copy.svg"
 import trashIcon from "../../../assets/trash.svg"
@@ -12,67 +12,57 @@ type Props = {
   onDelete: () => void
 }
 
-const ArchiveActions: FC<Props> = ({ size, textToHandle, id, onDelete }) => {
+const ArchiveActions: FC<Props> = ({ size, id, onDelete }) => {
   const [showModal, setShowModal] = useState(false)
   const [copied, setCopied] = useState(false)
-  const [text, setText] = useState(textToHandle)
 
-  useEffect(() => {
-    setText(textToHandle)
-  }, [textToHandle])
-
-  useEffect(() => {
-    fetchAndSetTextFromSegments()
-  }, [id])
-
-  useEffect(() => {
-    if (!copied) return
-    const timer = setTimeout(() => setCopied(false), 2000)
-    return () => clearTimeout(timer)
-  }, [copied])
-
-  const fetchAndSetTextFromSegments = async () => {
+  const copyText = async () => {
     try {
       const data = await getRequestDetail(id)
       if (Array.isArray(data.segments)) {
         const combinedText = data.segments.map((seg: { text: string }) => seg.text).join(" ")
-        setText(combinedText)
+        await navigator.clipboard.writeText(combinedText)
+        setCopied(true)
+        setTimeout(() => setCopied(false), 2000)
       }
-    } catch (error) {
-      console.error("خطا در دریافت جزئیات:", error)
-    }
-  }
-
-  const copyText = async () => {
-    try {
-      await navigator.clipboard.writeText(text)
-      setCopied(true)
     } catch { /* empty */ }
   }
 
-  const downloadTxt = () => {
-    const blob = new Blob([text], { type: "text/plain" })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement("a")
-    a.href = url
-    a.download = "transcript.txt"
-    a.click()
-    URL.revokeObjectURL(url)
+  const downloadTxt = async () => {
+    try {
+      const data = await getRequestDetail(id)
+      if (Array.isArray(data.segments)) {
+        const combinedText = data.segments.map((seg: { text: string }) => seg.text).join(" ")
+        const blob = new Blob([combinedText], { type: "text/plain" })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement("a")
+        a.href = url
+        a.download = "transcript.txt"
+        a.click()
+        URL.revokeObjectURL(url)
+      }
+    } catch { /* empty */ }
   }
 
-  const downloadWord = () => {
-    const htmlContent = `
-      <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-      <head><meta charset='utf-8'><title>Document</title></head>
-      <body>${text.replace(/\n/g, "<br>")}</body></html>
-    `
-    const blob = new Blob([htmlContent], { type: "application/msword" })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement("a")
-    a.href = url
-    a.download = "transcript.doc"
-    a.click()
-    URL.revokeObjectURL(url)
+  const downloadWord = async () => {
+    try {
+      const data = await getRequestDetail(id)
+      if (Array.isArray(data.segments)) {
+        const combinedText = data.segments.map((seg: { text: string }) => seg.text).join(" ")
+        const htmlContent = `
+          <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+          <head><meta charset='utf-8'><title>Document</title></head>
+          <body>${combinedText.replace(/\n/g, "<br>")}</body></html>
+        `
+        const blob = new Blob([htmlContent], { type: "application/msword" })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement("a")
+        a.href = url
+        a.download = "transcript.doc"
+        a.click()
+        URL.revokeObjectURL(url)
+      }
+    } catch { /* empty */ }
   }
 
   const openModal = () => setShowModal(true)
@@ -83,8 +73,7 @@ const ArchiveActions: FC<Props> = ({ size, textToHandle, id, onDelete }) => {
       await deleteRequest(id)
       onDelete()
       closeModal()
-    } catch (error) {
-      console.error("خطا در حذف:", error)
+    } catch {
       closeModal()
     }
   }
@@ -121,9 +110,7 @@ const ArchiveActions: FC<Props> = ({ size, textToHandle, id, onDelete }) => {
         <div
           title={copied ? "کپی شد" : "copy"}
           onClick={copyText}
-          className={`p-[6px] w-6 h-6 flex items-center justify-center rounded-full cursor-pointer hover:bg-gray-200 hover:brightness-90 group transition ${
-            copied ? "bg-green-200" : ""
-          }`}
+          className={`p-[6px] w-6 h-6 flex items-center justify-center rounded-full cursor-pointer hover:bg-gray-200 hover:brightness-90 group transition ${copied ? "bg-green-200" : ""}`}
         >
           <img
             src={copyIcon}
@@ -156,7 +143,7 @@ const ArchiveActions: FC<Props> = ({ size, textToHandle, id, onDelete }) => {
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="p-[6px] bg-white rounded-lg p-5 w-[320px] text-center shadow-xl animate-fadeIn"
+            className="bg-white rounded-lg p-5 w-[320px] text-center shadow-xl animate-fadeIn"
             style={{ animationDuration: "0.25s", animationTimingFunction: "ease-out" }}
           >
             <p className="mb-6 text-gray-800">آیا از حذف این مورد مطمئن هستید؟</p>

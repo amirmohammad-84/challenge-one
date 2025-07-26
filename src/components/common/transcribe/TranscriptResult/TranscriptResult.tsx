@@ -47,12 +47,13 @@ const Tooltip = memo(({ children, text }: { children: React.ReactNode; text: str
 export default function TranscriptResult({ tab, audioUrl, segments = [], onReset, type: initialType = "simple" }: Props) {
   const [type, setType] = useState<"simple" | "timeline">(initialType)
   const [copied, setCopied] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(segments.length === 0)
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 6000)
-    return () => clearTimeout(timer)
-  }, [])
+    if (segments && segments.length > 0) {
+      setIsLoading(false)
+    }
+  }, [segments])
 
   const text = segments.map((s) => s.text).join(" ")
 

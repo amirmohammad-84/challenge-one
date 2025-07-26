@@ -1,6 +1,7 @@
 import ArchiveTable from "./ArchiveTable"
 import Pagination from "./Pagination"
 import type { FileItem } from "../../Types/archive"
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { useState, useMemo, useEffect } from "react"
 import { listRequests } from "../../../api/callApi"
 
@@ -10,8 +11,8 @@ type ApiResultItem = {
   duration: number
   processed: boolean
   segments: {
-    start: number | string
-    end: number | string
+    start: number
+    end: number
     text: string
   }[]
   size?: number
@@ -21,23 +22,14 @@ type ApiResultItem = {
 export default function ArchiveList() {
   const [files, setFiles] = useState<FileItem[]>([])
   const [currentPage, setCurrentPage] = useState(1)
+  const [queryString, setQueryString] = useState<string | undefined>(undefined)
   const [loading, setLoading] = useState(true)
-
-  const pageSize = 8
-  const totalPages = Math.ceil(files.length / pageSize)
-
-  const startIndex = (currentPage - 1) * pageSize
-  const endIndex = Math.min(startIndex + pageSize, files.length)
-
-  const paginatedFiles = useMemo(
-    () => files.slice(startIndex, endIndex),
-    [files, startIndex, endIndex]
-  )
 
   useEffect(() => {
     async function fetchFiles() {
+      setLoading(true)
       try {
-        const data = await listRequests()
+        const data = await listRequests(queryString)
         if (data && Array.isArray(data.results)) {
           const mappedFiles: FileItem[] = data.results.map((item: ApiResultItem) => {
             let iconType: "mic" | "cloud" | "link" = "cloud"
@@ -77,44 +69,16 @@ export default function ArchiveList() {
     }
 
     fetchFiles()
-  }, [])
+  }, [queryString])
 
-  function getPageNumbers() {
-    const delta = 2
-    const range: (number | string)[] = []
-    let l = -1
-
-    for (let i = 1; i <= totalPages; i++) {
-      if (
-        i === 1 ||
-        i === totalPages ||
-        (i >= currentPage - delta && i <= currentPage + delta)
-      ) {
-        if (l !== -1 && i - l > 1) {
-          range.push("…")
-        }
-        range.push(i)
-        l = i
-      }
-    }
-    return range
-  }
-
-  function handlePrevious() {
-    setCurrentPage((p) => Math.max(p - 1, 1))
-  }
-
-  function handleNext() {
-    setCurrentPage((p) => Math.min(p + 1, totalPages))
-  }
-
-  function handlePageChange(page: number) {
+  function handlePageChange(page: number, query: string) {
     setCurrentPage(page)
+    setQueryString(query)
   }
 
   function handleRemove(id: string) {
     setFiles((prev) => prev.filter((f) => f.id !== id))
-    if (currentPage > 1 && (files.length - 1) <= (currentPage - 1) * pageSize) {
+    if (currentPage > 1 && (files.length - 1) <= (currentPage - 1) * 10) {
       setCurrentPage((p) => p - 1)
     }
   }
@@ -127,18 +91,8 @@ export default function ArchiveList() {
         <div className="text-center py-10 text-gray-500">هیچ آرشیوی موجود نیست.</div>
       ) : (
         <>
-          <ArchiveTable files={paginatedFiles} onRemove={handleRemove} />
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPrevious={handlePrevious}
-            onNext={handleNext}
-            onPageChange={handlePageChange}
-            startIndex={startIndex}
-            endIndex={endIndex}
-            total={files.length}
-            getPageNumbers={getPageNumbers}
-          />
+          <ArchiveTable files={files} onRemove={handleRemove} />
+          <Pagination currentPage={currentPage} onPageChange={handlePageChange} />
         </>
       )}
     </div>

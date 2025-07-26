@@ -14,13 +14,15 @@ export const transcribeMedia = async (mediaUrl: string) => {
   return res.json();
 };
 
-export const listRequests = async () => {
-  const res = await fetch(`/api/requests/`, {
+export const listRequests = async (query?: string) => {
+  const url = `/api/requests/${query ? `?${query}` : ''}`;
+  const res = await fetch(url, {
     method: 'GET',
     headers,
   });
   return res.json();
 };
+
 
 export const getMediaImage = async (mediaUrl: string) => {
   const encodedUrl = encodeURIComponent(mediaUrl);
