@@ -1,8 +1,7 @@
 import ArchiveTable from "./ArchiveTable"
 import Pagination from "./Pagination"
 import type { FileItem } from "../../Types/archive"
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { useState, useMemo, useEffect } from "react"
+import { useState, useEffect } from "react"
 import { listRequests } from "../../../api/callApi"
 
 type ApiResultItem = {

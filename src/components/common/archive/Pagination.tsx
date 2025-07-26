@@ -11,8 +11,7 @@ const toPersianNumber = (num: number | string) =>
   String(num).replace(/\d/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[parseInt(d)])
 
 const Pagination: React.FC<PaginationProps> = ({ currentPage, onPageChange }) => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [totalPages, setTotalPages] = useState(1)
+  const [, setTotalPages] = useState(1)
   const [nextLink, setNextLink] = useState<string | null>(null)
   const [prevLink, setPrevLink] = useState<string | null>(null)
   const [pageNumbers, setPageNumbers] = useState<(number | string)[]>([])
