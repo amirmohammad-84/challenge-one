@@ -1,73 +1,64 @@
-import { useState, useMemo, useEffect, useRef } from "react"
+import { useState, useMemo, useEffect, useRef } from 'react'
+import { MicrophoneIcon, ArrowUpTrayIcon, LinkIcon } from '@heroicons/react/24/solid'
+import { useSearchParams } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux'
+
+import TabButton from './TabButton'
+import TranscriberCard from './TranscriberCard'
+import { TranscriberInput } from './TranscriberInput'
+import type { TabConfig } from '../../Types/transcriber'
+import Footer from '../Footer'
+import TranscriptResult from './TranscriptResult/TranscriptResult'
+import { transcribeMedia } from '../../../api/callApi'
+import { type RootState } from '../../store/store'
 import {
-  MicrophoneIcon,
-  ArrowUpTrayIcon,
-  LinkIcon,
-} from "@heroicons/react/24/solid"
-import { useSearchParams } from "react-router-dom"
-
-import TabButton from "./TabButton"
-import TranscriberCard from "./TranscriberCard"
-import { TranscriberInput } from "./TranscriberInput"
-import type { TabConfig } from "../../Types/transcriber"
-import Footer from "../Footer"
-import TranscriptResult from "./TranscriptResult/TranscriptResult"
-import { transcribeMedia } from "../../../api/callApi"
-
-type Segment = {
-  start: number
-  end: number
-  text: string
-}
+  setActiveTab,
+  setAudioUrl,
+  setSegments,
+  resetTranscription,
+} from '../../store/slices/transcriptionSlice'
 
 export default function TranscriberTabs() {
   const [searchParams, setSearchParams] = useSearchParams()
-  const tabFromQuery = searchParams.get("tab") as "record" | "upload" | "link" | null
+  const dispatch = useDispatch()
 
-  const [activeTab, setActiveTab] = useState<"record" | "upload" | "link">(
-    tabFromQuery ?? "record"
-  )
+  const audioUrl = useSelector((state: RootState) => state.transcription.audioUrl)
+  const activeTab = useSelector((state: RootState) => state.transcription.activeTab)
+  const segments = useSelector((state: RootState) => state.transcription.segments)
 
   const [submitted, setSubmitted] = useState(false)
-  const [audioUrl, setAudioUrl] = useState<string | null>(null)
-  const [, setTranscriptText] = useState<string | null>(null)
-  const [segments, setSegments] = useState<Segment[] | null>(null)
+
+  const tabFromQuery = searchParams.get('tab') as 'record' | 'upload' | 'link' | null
 
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const isSendingRef = useRef(false)
 
   useEffect(() => {
     if (tabFromQuery && tabFromQuery !== activeTab) {
-      setActiveTab(tabFromQuery)
+      dispatch(setActiveTab(tabFromQuery))
       setSubmitted(false)
-      setAudioUrl(null)
-      setTranscriptText(null)
-      setSegments(null)
+      dispatch(resetTranscription())
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tabFromQuery])
 
   const handleSend = async (blobUrl?: string) => {
     if (isSendingRef.current) return
     isSendingRef.current = true
 
-    setAudioUrl(blobUrl || null)
+    dispatch(setAudioUrl(blobUrl || null))
     setSubmitted(true)
 
     if (blobUrl) {
       try {
         const response = await transcribeMedia(blobUrl)
-        const finalText = response?.text || response?.[0]?.text || "نتیجه‌ای یافت نشد"
         const finalSegmentsRaw = response?.segments || response?.[0]?.segments || null
 
-        const finalSegments: Segment[] | null = Array.isArray(finalSegmentsRaw)
-          ? (finalSegmentsRaw as Segment[])
-          : null
+        const finalSegments = Array.isArray(finalSegmentsRaw) ? finalSegmentsRaw : null
 
-        setTranscriptText(finalText)
-        setSegments(finalSegments)
+        dispatch(setSegments(finalSegments))
       } catch {
-        setTranscriptText("خطا در پردازش فایل.")
-        setSegments(null)
+        dispatch(setSegments(null))
       } finally {
         isSendingRef.current = false
       }
@@ -76,12 +67,10 @@ export default function TranscriberTabs() {
     }
   }
 
-  const handleTabClick = (tabId: "record" | "upload" | "link") => {
-    setActiveTab(tabId)
+  const handleTabClick = (tabId: 'record' | 'upload' | 'link') => {
+    dispatch(setActiveTab(tabId))
     setSubmitted(false)
-    setAudioUrl(null)
-    setTranscriptText(null)
-    setSegments(null)
+    dispatch(resetTranscription())
     setSearchParams({ tab: tabId })
   }
 
@@ -98,10 +87,10 @@ export default function TranscriberTabs() {
 
   const tabs: TabConfig[] = [
     {
-      id: "record",
-      label: "ضبط گفتار",
+      id: 'record',
+      label: 'ضبط گفتار',
       icon: <MicrophoneIcon className="w-5 h-5" />,
-      color: "#00BA9F",
+      color: '#00BA9F',
       iconSize: 32,
       roundedTopRight: false,
       description: (
@@ -113,10 +102,10 @@ export default function TranscriberTabs() {
       ),
     },
     {
-      id: "upload",
-      label: "بارگذاری فایل",
+      id: 'upload',
+      label: 'بارگذاری فایل',
       icon: <ArrowUpTrayIcon className="w-5 h-5" />,
-      color: "#118AD3",
+      color: '#118AD3',
       iconSize: 32,
       description: (
         <>
@@ -127,10 +116,10 @@ export default function TranscriberTabs() {
       ),
     },
     {
-      id: "link",
-      label: "لینک",
+      id: 'link',
+      label: 'لینک',
       icon: <LinkIcon className="w-5 h-5" />,
-      color: "#FF1654",
+      color: '#FF1654',
       iconSize: 16,
       showButton: false,
       description: (
@@ -144,10 +133,8 @@ export default function TranscriberTabs() {
     },
   ]
 
-  const currentTab = useMemo(
-    () => tabs.find((tab) => tab.id === activeTab)!,
-    [activeTab]
-  )
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const currentTab = useMemo(() => tabs.find((tab) => tab.id === activeTab)!, [activeTab])
 
   return (
     <div className="flex flex-col items-center">
@@ -174,14 +161,12 @@ export default function TranscriberTabs() {
               segments={segments ?? undefined}
               onReset={() => {
                 setSubmitted(false)
-                setAudioUrl(null)
-                setTranscriptText(null)
-                setSegments(null)
+                dispatch(resetTranscription())
               }}
             />
           ) : (
             <>
-              {activeTab === "upload" ? (
+              {activeTab === 'upload' ? (
                 <>
                   <input
                     ref={fileInputRef}

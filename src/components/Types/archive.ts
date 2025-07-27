@@ -15,4 +15,7 @@ export type FileItem = {
   duration: number
   icon: "link" | "mic" | "cloud"
   size: string
+  url: string
+  fileType?: string
+  uploadDate: string
 }

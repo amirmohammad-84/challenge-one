@@ -6,7 +6,7 @@ import downloadIcon from "../../../assets/download.svg"
 import { deleteRequest, getRequestDetail } from "../../../api/callApi"
 
 type Props = {
-  size: string
+  size: string | number
   textToHandle: string
   id: number
   onDelete: () => void

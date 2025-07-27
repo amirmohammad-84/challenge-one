@@ -1,4 +1,3 @@
-// src/pages/archive.tsx
 import ArchiveList from "../components/common/archive/ArchiveList"
 
 export default function ArchivePage() {
