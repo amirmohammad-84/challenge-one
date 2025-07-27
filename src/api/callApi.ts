@@ -18,6 +18,7 @@ export const listRequests = async (query?: string) => {
   const url = `/api/requests/${query ? `?${query}` : ''}`;
   const res = await fetch(url, {
     method: 'GET',
+    
     headers,
   });
   return res.json();
