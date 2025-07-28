@@ -1,5 +1,5 @@
 import { useState, type FC } from "react"
-import wordIcon from "../../../assets/word.svg"
+import wordIcon from "../../../assets/Word.svg"
 import copyIcon from "../../../assets/copy.svg"
 import trashIcon from "../../../assets/trash.svg"
 import downloadIcon from "../../../assets/download.svg"

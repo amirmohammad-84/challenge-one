@@ -1,5 +1,6 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useMemo, useEffect, useRef } from 'react'
-import { MicrophoneIcon, ArrowUpTrayIcon, LinkIcon } from '@heroicons/react/24/solid'
+import { LinkIcon } from '@heroicons/react/24/solid'
 import { useSearchParams } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 
@@ -17,6 +18,9 @@ import {
   setSegments,
   resetTranscription,
 } from '../../store/slices/transcriptionSlice'
+
+import CloudIcon from '../../../assets/cloud.svg'
+import Mic2Icon from '../../../assets/mic2.svg'
 
 export default function TranscriberTabs() {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -39,7 +43,6 @@ export default function TranscriberTabs() {
       setSubmitted(false)
       dispatch(resetTranscription())
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tabFromQuery])
 
   const handleSend = async (blobUrl?: string) => {
@@ -53,9 +56,7 @@ export default function TranscriberTabs() {
       try {
         const response = await transcribeMedia(blobUrl)
         const finalSegmentsRaw = response?.segments || response?.[0]?.segments || null
-
         const finalSegments = Array.isArray(finalSegmentsRaw) ? finalSegmentsRaw : null
-
         dispatch(setSegments(finalSegments))
       } catch {
         dispatch(setSegments(null))
@@ -89,7 +90,7 @@ export default function TranscriberTabs() {
     {
       id: 'record',
       label: 'ضبط گفتار',
-      icon: <MicrophoneIcon className="w-5 h-5" />,
+      icon: <img src={Mic2Icon} alt="mic icon" className="w-5 h-5" />,
       color: '#00BA9F',
       iconSize: 32,
       roundedTopRight: false,
@@ -104,7 +105,7 @@ export default function TranscriberTabs() {
     {
       id: 'upload',
       label: 'بارگذاری فایل',
-      icon: <ArrowUpTrayIcon className="w-5 h-5" />,
+      icon: <img src={CloudIcon} alt="cloud icon" className="w-5 h-5" />,
       color: '#118AD3',
       iconSize: 32,
       description: (
@@ -133,7 +134,6 @@ export default function TranscriberTabs() {
     },
   ]
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const currentTab = useMemo(() => tabs.find((tab) => tab.id === activeTab)!, [activeTab])
 
   return (
