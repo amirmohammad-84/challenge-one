@@ -31,7 +31,7 @@ export const getMediaImage = async (mediaUrl: string) => {
     method: 'GET',
     headers: {
       ...headers,
-      Authorization: 'Token d6e0206d421c91200d2753c24892bb95d365e74c', // متفاوت بود
+      Authorization: 'Token d6e0206d421c91200d2753c24892bb95d365e74c',
     },
   });
   return res.blob();
